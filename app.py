@@ -12,7 +12,7 @@ import plotly.express as px
 app = dash.Dash(__name__)#, external_stylesheets=external_stylesheets)
 
 # df = pd.read_csv('https://gist.githubusercontent.com/chriddyp/5d1ea79569ed194d432e56108a04d188/raw/a9f9e8076b837d541398e999dcbac2b2826a81f8/gdp-life-exp-2007.csv')	
-raw_df = pd.read_csv('tw_racquet_specs.csv')
+raw_df = pd.read_csv('data/racquet_specs.csv')
 
 # initial data source filtering (NaNs & erroneous values)
 df = raw_df[(raw_df['Beam Width (avg. mm)']>5) & \
@@ -42,6 +42,12 @@ df['Balance (pts) jittered'] = df['Balance (pts)'].apply(add_jitter, max_jitter=
 df['String Density (intersections / sq. in.) jittered'] = df['String Density (intersections / sq. in.)'].apply(add_jitter, max_jitter=string_density_max_jitter)
 df['Swingweight jittered'] = df['Swingweight'].apply(add_jitter, max_jitter=swingweight_max_jitter)
 df['Stiffness jittered'] = df['Stiffness'].apply(add_jitter, max_jitter=stiffness_max_jitter)
+
+fields_to_norm = [] # list out all 7 strings of above col names
+
+types_of_norming = {} # min-max-scaler, 
+
+
 
 colors = {
 	'black': 'black',
