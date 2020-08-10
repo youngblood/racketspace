@@ -68,52 +68,46 @@ df['url'] = df[['tw_url','name']].apply(replace_blank_urls_with_ebay, axis=1)
 df['Current/Old Models'] = df['tw_url'].apply(lambda x: \
 	'Current Model' if type(x) == str and x != '' else 'Old Model')
 
-app.layout = html.Div(children=[
-	html.Div(style={'padding':"5px"}, children=[ 
+app.layout = html.Div(style={'padding':"20px"}, children=[
+	html.Div(className='twelve columns', children=[ 
 		html.H1(children=[
 							'RacquetSpace', 
 							html.Img(src=app.get_asset_url('logo.png'),height=50)
 						 ],
-		),
+		)],
+	),
 
 
-		html.Div(style={'outline': '1px solid #794bc4'}, children=[ 
-			html.Details(children=[ # style={'margin-bottom': '25px'}, # style={'outline': '1px solid #794bc4'}, 
-		    	html.Summary('Filters',style={'color':colors['purple'],'outline':'none'}),#children=[html.Label('Filters')]),
-		    	
-		    	html.Div(style={'padding':"5px"}, children=[
-					# html.Div(style={'float':'left', 'min-width': '5%', 'padding': '10px'}, children=[
-						
-					# ]),
-					html.Div(style={'padding': '10px'}, children=[ #'float':'left', 
-						html.Label(children=[ #style={'float':'left'}, 
-							'Manufacturers',
-							dcc.Dropdown(
-								id='mfr-dropdown',
-								options=[{'label': mfr, 'value': mfr} for mfr in sorted(list(df['mfr'].unique()))],
-								multi=True,
-								style={'background-color':colors['white'], 'color':colors['black'], 'border-radius':'4px'},
-								value=sorted(list(df['mfr'].unique()))
-							),
-						]),# style={'color': colors['header']}),
-						html.Button('Select All', id='select-all-btn', n_clicks=0, style={'padding':'2px'}), # 'float':'left',
-						dcc.Checklist(
-						    id='current-models-only-checkbox',
-						    # style={'float':'left'},
-						    # style={'background-color':colors['white'], 'color':colors['black']},
-						    options=[
-						        {'label': 'Current Models Only', 'value': 'True'},
-						    ],
-						    value=[]
-						),
-						
-					]),
-					# html.Br(),
-					# html.Br(),
-					
-					
-					html.Div(# className='one-third',
-							 style={'width': '30%', 'padding': '10px', 'float':'left'},
+	html.Div(id='filters-div', className='twelve columns', style={'outline': '1px solid #794bc4', 'padding':'10px'}, children=[ 
+		html.Details(children=[ 
+	    	html.Summary('Filters',style={'color':colors['purple'],'outline':'none'}),#children=[html.Label('Filters')]),
+	    	
+	    	html.Div(style={'padding':"0px"}, children=[
+				html.Div(className='twelve columns', children=[ 
+					html.Label('Manufacturers',style={'float':'left', 'margin-bottom':'2px'}),
+					html.Button('Select All', id='select-all-btn', n_clicks=0, style={'float':'left','padding':'2px','margin-left':'5px', 'margin-top':'5px'}), # 
+					dcc.Dropdown(
+						className='twelve columns',
+						id='mfr-dropdown',
+						options=[{'label': mfr, 'value': mfr} for mfr in sorted(list(df['mfr'].unique()))],
+						multi=True,
+						style={'background-color':colors['white'], 'color':colors['black'], 'border-radius':'4px'},
+						value=sorted(list(df['mfr'].unique()))
+					),
+				]),
+				html.Div(className='twelve columns', children=[
+					dcc.Checklist(
+					    id='current-models-only-checkbox',
+					    options=[
+					        {'label': 'Current Models Only', 'value': 'True'},
+					    ],
+					    value=[]
+					),
+				]),
+				html.Div(id='six-slider-filter-div', className='twelve columns', children=[
+					html.Div('full-div',className='twelve columns',style={'outline': '1px solid #794bc4'}),
+					html.Div(className='four columns', style={'padding':'2%'},
+							 #style={'width': '30%', 'padding': '10px', 'float':'left'},
 							 children=[
 						html.Div(
 							children=[
@@ -148,13 +142,10 @@ app.layout = html.Div(children=[
 							]
 						),
 					]),
-					# html.Br(),
 
-					html.Div(# className='one-third',
-							 style={'float':'left', 'width': '30%', 'padding': '10px'}, 
+					html.Div(className='four columns', style={'padding':'2%'},
 							 children=[
 						html.Div(
-							# style={'padding':"25px"}, 
 							children=[
 								html.Label(children=['Balance (pts HL/HH)',
 									dcc.RangeSlider(
@@ -187,8 +178,7 @@ app.layout = html.Div(children=[
 						),
 					]),
 					
-					html.Div(# className='one-third',
-							 style={'float':'left', 'width': '30%', 'padding': '10px'}, 
+					html.Div(className='four columns', style={'padding':'2%'},
 							 children=[
 						html.Div(
 							children=[
@@ -222,70 +212,69 @@ app.layout = html.Div(children=[
 								]),
 							]
 						),
-					]),					
-				]), 
-			]),
+					]),	
+				]),				
+			]), 
 		]),
-		html.Br(),
-		html.Br(),
-		# html.Br(),
-		html.Div(id='settings', style={'max-width': 400, 'float':'left', 'outline': '1px solid #794bc4'}, children=[
-			dcc.Tabs(id="tabs", value='tab-1', parent_className='custom-tabs', className='custom-tabs-container', children=[
-		        dcc.Tab(label='Choose X/Y Axes', value='tab-1', className='custom-tab',
-                		selected_className='custom-tab--selected',# style={'background-color':'#3d3d3d'},
-                		children=[
-		        	html.Label('X-Axis'),
-					dcc.Dropdown(
-						id='x-axis-dropdown',
-						className='custom-dropdown',
-						style={'background-color':colors['white'], 'color':colors['black'], 'border-radius':'4px'},
-						options=[{'label': 'Head Size (in)', 'value': 'Head Size (in)'},
-								 {'label': 'Strung Weight (oz)', 'value': 'Strung Weight (oz)'},
-								 {'label': 'Beam Width (avg. mm)', 'value': 'Beam Width (avg. mm)'}],
-						value='Head Size (in)'
-					),
-					html.Br(),  
-					html.Label('Y-Axis'),
-					dcc.Dropdown(
-						id='y-axis-dropdown',
-						className='custom-dropdown',
-						style={'background-color':colors['white'], 'color':colors['black'], 'border-radius':'4px'},
-						options=[{'label': 'Head Size (in)', 'value': 'Head Size (in)'},
-								 {'label': 'Strung Weight (oz)', 'value': 'Strung Weight (oz)'},
-								 {'label': 'Beam Width (avg. mm)', 'value': 'Beam Width (avg. mm)'}],
-						value='Strung Weight (oz)'
-					),
-					html.Br(),  
-					dcc.Checklist(
-						    id='jitter-checkbox',
-						    options=[{'label': 'Jitter', 'value': 'True'}],
-						    value=[]
-					),
-		        ]),#, style={'max-width': 100}),
-		        dcc.Tab(label='PCA', value='tab-2',className='custom-tab',
-                		selected_className='custom-tab--selected'),#, style={'max-width': 100}),
+	]),
+	html.Br(),
+	html.Br(),
+	html.Div(className='three columns', id='settings', style={'outline': '1px solid #794bc4','margin-top':'20px','padding':'10px'}, children=[
+		dcc.Tabs(id="tabs", value='tab-1', parent_className='custom-tabs', className='custom-tabs-container', children=[
+	        dcc.Tab(label='Choose X/Y Axes', value='tab-1', className='custom-tab',
+            		selected_className='custom-tab--selected',
+            		children=[
+	        	html.Label('X-Axis'),
+				dcc.Dropdown(
+					id='x-axis-dropdown',
+					className='custom-dropdown',
+					style={'background-color':colors['white'], 'color':colors['black'], 'border-radius':'4px'},
+					options=[{'label': 'Head Size (in)', 'value': 'Head Size (in)'},
+							 {'label': 'Strung Weight (oz)', 'value': 'Strung Weight (oz)'},
+							 {'label': 'Beam Width (avg. mm)', 'value': 'Beam Width (avg. mm)'}],
+					value='Head Size (in)'
+				),
+				html.Br(),  
+				html.Label('Y-Axis'),
+				dcc.Dropdown(
+					id='y-axis-dropdown',
+					className='custom-dropdown',
+					style={'background-color':colors['white'], 'color':colors['black'], 'border-radius':'4px'},
+					options=[{'label': 'Head Size (in)', 'value': 'Head Size (in)'},
+							 {'label': 'Strung Weight (oz)', 'value': 'Strung Weight (oz)'},
+							 {'label': 'Beam Width (avg. mm)', 'value': 'Beam Width (avg. mm)'}],
+					value='Strung Weight (oz)'
+				),
+				html.Br(),  
+				dcc.Checklist(
+					    id='jitter-checkbox',
+					    options=[{'label': 'Jitter', 'value': 'True'}],
+					    value=[]
+				),
+	        ]),
+	        dcc.Tab(label='PCA', value='tab-2',className='custom-tab',
+            		selected_className='custom-tab--selected'),
 
-		    ]),
-			html.Br(),  
-			html.Label('Color'),
-		    dcc.Dropdown(
-				id='color-dropdown',
-				style={'background-color':colors['white'], 'color':colors['black'], 'border-radius':'4px'},
-				className='custom-dropdown',
-				options=[{'label': 'Head Size (in)', 'value': 'Head Size (in)'},
-						 {'label': 'Strung Weight (oz)', 'value': 'Strung Weight (oz)'},
-						 {'label': 'Beam Width (avg. mm)', 'value': 'Beam Width (avg. mm)'},
-						 {'label': 'Current/Old Models', 'value': 'Current/Old Models'},
-						 {'label': 'String Density (intersections / sq. in.)', 'value': 'String Density (intersections / sq. in.)'}],
-				value='Beam Width (avg. mm)'
-			),
-		]),
-		html.Div(id='graph-div', style={'min-width': '80%', 'min-height': 500, 'float':'right', 'outline': '1px solid #794bc4'}, children=[
-			dcc.Graph(
-		        id='racquetspace_graph',
-		    ),
-		]),
-	]),    
+	    ]),
+		html.Br(),  
+		html.Label('Color'),
+	    dcc.Dropdown(
+			id='color-dropdown',
+			style={'background-color':colors['white'], 'color':colors['black'], 'border-radius':'4px'},
+			className='custom-dropdown',
+			options=[{'label': 'Head Size (in)', 'value': 'Head Size (in)'},
+					 {'label': 'Strung Weight (oz)', 'value': 'Strung Weight (oz)'},
+					 {'label': 'Beam Width (avg. mm)', 'value': 'Beam Width (avg. mm)'},
+					 {'label': 'Current/Old Models', 'value': 'Current/Old Models'},
+					 {'label': 'String Density (intersections / sq. in.)', 'value': 'String Density (intersections / sq. in.)'}],
+			value='Beam Width (avg. mm)'
+		),
+	]),
+	html.Div(className='nine columns', id='graph-div', style={'outline': '1px solid #794bc4','margin-top':'20px', 'margin-left':'20px'}, children=[
+		dcc.Graph(
+	        id='racquetspace_graph',
+	    ),
+	]),  
 ])
 
 @app.callback(
