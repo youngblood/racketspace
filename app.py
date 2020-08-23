@@ -15,33 +15,42 @@ app = dash.Dash(__name__)#, external_stylesheets=external_stylesheets)
 raw_df = pd.read_csv('data/racquet_specs.csv')
 
 # initial data source filtering (NaNs & erroneous values)
-df = raw_df[(raw_df['Beam Width (avg. mm)']>5) & \
-                        (raw_df['Head Size (in)']>60) & \
-                         (raw_df['Strung Weight (oz)']>5) & \
-                         (raw_df['Balance (pts)'] >= -15) & \
-                         (raw_df['Balance (pts)'] <= 15)]
+df = raw_df[(raw_df['Head Size (in)']>=60) & \
+			(raw_df['Head Size (in)']<=140) & \
+			(raw_df['Strung Weight (oz)']>=5) & \
+			(raw_df['Strung Weight (oz)']<=20) & \
+			(raw_df['Beam Width (avg. mm)']>=5) & \
+			(raw_df['Beam Width (avg. mm)']<=50) & \
+			(raw_df['Balance (pts)'] >= -20) & \
+            (raw_df['Balance (pts)'] <= 20) & \
+            (raw_df['String Density (intersections / sq. in.)'] >= 1) & \
+            (raw_df['String Density (intersections / sq. in.)'] <= 6) & \
+            (raw_df['Swingweight'] >= 100) & \
+            (raw_df['Swingweight'] <= 600) & \
+            (raw_df['Stiffness'] >= 10) & \
+            (raw_df['Stiffness'] <= 100)]
 
 df.rename(columns={'url': 'tw_url', 'img_url': 'tw_img_url'},
 		  inplace=True)
 
-head_size_max_jitter 	  = 0.5
-strung_weight_max_jitter  = 0.05
-beam_width_max_jitter 	  = 0.5
-balance_max_jitter 		  = 0.5
-string_density_max_jitter = 0.05
-swingweight_max_jitter    = 0.5
-stiffness_max_jitter      = 0.5
+head_size_jitter 	  = 0.5
+strung_weight_jitter  = 0.05
+beam_width_jitter 	  = 0.5
+balance_jitter 		  = 0.5
+string_density_jitter = 0.05
+swingweight_jitter    = 0.5
+stiffness_jitter      = 0.5
 
 def add_jitter(input, max_jitter):
     return input + np.random.uniform(-max_jitter, max_jitter)
 
-df['Head Size (in) jittered'] = df['Head Size (in)'].apply(add_jitter, max_jitter=head_size_max_jitter)
-df['Strung Weight (oz) jittered'] = df['Strung Weight (oz)'].apply(add_jitter, max_jitter=strung_weight_max_jitter)
-df['Beam Width (avg. mm) jittered'] = df['Beam Width (avg. mm)'].apply(add_jitter, max_jitter=beam_width_max_jitter)
-df['Balance (pts) jittered'] = df['Balance (pts)'].apply(add_jitter, max_jitter=balance_max_jitter)
-df['String Density (intersections / sq. in.) jittered'] = df['String Density (intersections / sq. in.)'].apply(add_jitter, max_jitter=string_density_max_jitter)
-df['Swingweight jittered'] = df['Swingweight'].apply(add_jitter, max_jitter=swingweight_max_jitter)
-df['Stiffness jittered'] = df['Stiffness'].apply(add_jitter, max_jitter=stiffness_max_jitter)
+df['Head Size (in) jittered'] = df['Head Size (in)'].apply(add_jitter, max_jitter=head_size_jitter)
+df['Strung Weight (oz) jittered'] = df['Strung Weight (oz)'].apply(add_jitter, max_jitter=strung_weight_jitter)
+df['Beam Width (avg. mm) jittered'] = df['Beam Width (avg. mm)'].apply(add_jitter, max_jitter=beam_width_jitter)
+df['Balance (pts) jittered'] = df['Balance (pts)'].apply(add_jitter, max_jitter=balance_jitter)
+df['String Density (intersections / sq. in.) jittered'] = df['String Density (intersections / sq. in.)'].apply(add_jitter, max_jitter=string_density_jitter)
+df['Swingweight jittered'] = df['Swingweight'].apply(add_jitter, max_jitter=swingweight_jitter)
+df['Stiffness jittered'] = df['Stiffness'].apply(add_jitter, max_jitter=stiffness_jitter)
 
 fields_to_norm = [] # list out all 7 strings of above col names
 
@@ -71,8 +80,8 @@ df['Current/Old Models'] = df['tw_url'].apply(lambda x: \
 app.layout = html.Div(style={'padding':"20px"}, children=[
 	html.Div(className='twelve columns', children=[ 
 		html.H1(children=[
-							'RacquetSpace', 
-							html.Img(src=app.get_asset_url('logo.png'),height=50)
+							html.Img(src=app.get_asset_url('logo.png'),height=50),
+							'RACKETSPACE', 
 						 ],
 		)],
 	),
@@ -101,12 +110,12 @@ app.layout = html.Div(style={'padding':"20px"}, children=[
 					    options=[
 					        {'label': 'Current Models Only', 'value': 'True'},
 					    ],
+					    style={'margin-top': '5px', 'margin-bottom': '5px'},
 					    value=[]
 					),
 				]),
 				html.Div(id='six-slider-filter-div', className='twelve columns', children=[
-					html.Div('full-div',className='twelve columns',style={'outline': '1px solid #794bc4'}),
-					html.Div(className='four columns', style={'padding':'2%'},
+					html.Div(className='four columns', style={'margin-left':'15px', 'margin-right':'15px'},
 							 #style={'width': '30%', 'padding': '10px', 'float':'left'},
 							 children=[
 						html.Div(
@@ -114,9 +123,10 @@ app.layout = html.Div(style={'padding':"20px"}, children=[
 								html.Label(children=['Head Size (in)',
 									dcc.RangeSlider(
 										id='head-size-slider',
+										className='filter-slider',
 										min=df['Head Size (in)'].min(),
 										max=df['Head Size (in)'].max(),
-										marks={i: '{}'.format(i) for i in range(int(df['Head Size (in)'].min()), int(df['Head Size (in)'].max())+1, 5)},
+										marks={i: '{}'.format(i) for i in range(70,140,10)},#int(df['Head Size (in)'].min()), int(df['Head Size (in)'].max())+1, 5)},
 										step=0.5,
 										tooltip = { 'always_visible': False },
 										value=[df['Head Size (in)'].min(), df['Head Size (in)'].max()]
@@ -125,12 +135,12 @@ app.layout = html.Div(style={'padding':"20px"}, children=[
 								
 							]
 						),
-						html.Br(),
 						html.Div(
 							children=[
 								html.Label(children=['Strung Weight (oz)',
 									dcc.RangeSlider(
 										id='strung-weight-slider',
+										className='filter-slider',
 										min=df['Strung Weight (oz)'].min(),
 										max=df['Strung Weight (oz)'].max(),
 										marks={i: '{}'.format(i) for i in range(int(df['Strung Weight (oz)'].min()), int(df['Strung Weight (oz)'].max())+1)},
@@ -143,13 +153,14 @@ app.layout = html.Div(style={'padding':"20px"}, children=[
 						),
 					]),
 
-					html.Div(className='four columns', style={'padding':'2%'},
+					html.Div(className='four columns', style={'margin-left':'15px', 'margin-right':'15px'},
 							 children=[
 						html.Div(
 							children=[
 								html.Label(children=['Balance (pts HL/HH)',
 									dcc.RangeSlider(
 										id='balance-slider',
+										className='filter-slider',
 										min=df['Balance (pts)'].min(),
 										max=df['Balance (pts)'].max(),
 										marks={i: '{} HL'.format(i) if i <0  else '{} HH'.format(i) for i in range(int(df['Balance (pts)'].min()), int(df['Balance (pts)'].max())+1, 5)},
@@ -160,12 +171,12 @@ app.layout = html.Div(style={'padding':"20px"}, children=[
 								]),
 							]
 						),
-						html.Br(),
 						html.Div(
 							children=[
 								html.Label(children=['Beam Width (avg. mm)',
 									dcc.RangeSlider(
 										id='beam-width-slider',
+										className='filter-slider',
 										min=df['Beam Width (avg. mm)'].min(),
 										max=df['Beam Width (avg. mm)'].max(),
 										marks={i: '{}'.format(i) for i in range(int(df['Beam Width (avg. mm)'].min()), int(df['Beam Width (avg. mm)'].max())+1, 2)},
@@ -178,13 +189,14 @@ app.layout = html.Div(style={'padding':"20px"}, children=[
 						),
 					]),
 					
-					html.Div(className='four columns', style={'padding':'2%'},
+					html.Div(className='four columns', style={'margin-left':'15px', 'margin-right':'15px'},
 							 children=[
 						html.Div(
 							children=[
 								html.Label(children=['String Density (X/in.²)',
 									dcc.RangeSlider(
 										id='string-density-slider',
+										className='filter-slider',
 										min=1.8,
 										max=4.2,
 										marks={2: '2', 3: '3', 4: '4'},
@@ -196,12 +208,12 @@ app.layout = html.Div(style={'padding':"20px"}, children=[
 								
 							]
 						),
-						html.Br(),
 						html.Div(
 							children=[
 								html.Label(children=['Swingweight',
 									dcc.RangeSlider(
 										id='swingweight-slider',
+										className='filter-slider',
 										min=1.8,
 										max=4.2,
 										marks={2: '2', 3: '3', 4: '4'},
@@ -221,7 +233,7 @@ app.layout = html.Div(style={'padding':"20px"}, children=[
 	html.Br(),
 	html.Div(className='three columns', id='settings', style={'outline': '1px solid #794bc4','margin-top':'20px','padding':'10px'}, children=[
 		dcc.Tabs(id="tabs", value='tab-1', parent_className='custom-tabs', className='custom-tabs-container', children=[
-	        dcc.Tab(label='Choose X/Y Axes', value='tab-1', className='custom-tab',
+	        dcc.Tab(label='Choose Axes', value='tab-1', className='custom-tab',
             		selected_className='custom-tab--selected',
             		children=[
 	        	html.Label('X-Axis'),
@@ -231,7 +243,12 @@ app.layout = html.Div(style={'padding':"20px"}, children=[
 					style={'background-color':colors['white'], 'color':colors['black'], 'border-radius':'4px'},
 					options=[{'label': 'Head Size (in)', 'value': 'Head Size (in)'},
 							 {'label': 'Strung Weight (oz)', 'value': 'Strung Weight (oz)'},
-							 {'label': 'Beam Width (avg. mm)', 'value': 'Beam Width (avg. mm)'}],
+							 {'label': 'Beam Width (avg. mm)', 'value': 'Beam Width (avg. mm)'},
+							 {'label': 'Balance (pts)', 'value': 'Balance (pts)'},
+							 {'label': 'String Density (intersections / sq. in.)', 'value': 'String Density (intersections / sq. in.)'},
+							 {'label': 'Swingweight', 'value': 'Swingweight'},
+							 {'label': 'Stiffness', 'value': 'Stiffness'},
+							 {'label': 'Current/Old Models', 'value': 'Current/Old Models'}],
 					value='Head Size (in)'
 				),
 				html.Br(),  
@@ -242,7 +259,12 @@ app.layout = html.Div(style={'padding':"20px"}, children=[
 					style={'background-color':colors['white'], 'color':colors['black'], 'border-radius':'4px'},
 					options=[{'label': 'Head Size (in)', 'value': 'Head Size (in)'},
 							 {'label': 'Strung Weight (oz)', 'value': 'Strung Weight (oz)'},
-							 {'label': 'Beam Width (avg. mm)', 'value': 'Beam Width (avg. mm)'}],
+							 {'label': 'Beam Width (avg. mm)', 'value': 'Beam Width (avg. mm)'},
+							 {'label': 'Balance (pts)', 'value': 'Balance (pts)'},
+							 {'label': 'String Density (intersections / sq. in.)', 'value': 'String Density (intersections / sq. in.)'},
+							 {'label': 'Swingweight', 'value': 'Swingweight'},
+							 {'label': 'Stiffness', 'value': 'Stiffness'},
+							 {'label': 'Current/Old Models', 'value': 'Current/Old Models'}],
 					value='Strung Weight (oz)'
 				),
 				html.Br(),  
@@ -265,8 +287,11 @@ app.layout = html.Div(style={'padding':"20px"}, children=[
 			options=[{'label': 'Head Size (in)', 'value': 'Head Size (in)'},
 					 {'label': 'Strung Weight (oz)', 'value': 'Strung Weight (oz)'},
 					 {'label': 'Beam Width (avg. mm)', 'value': 'Beam Width (avg. mm)'},
-					 {'label': 'Current/Old Models', 'value': 'Current/Old Models'},
-					 {'label': 'String Density (intersections / sq. in.)', 'value': 'String Density (intersections / sq. in.)'}],
+					 {'label': 'Balance (pts)', 'value': 'Balance (pts)'},
+					 {'label': 'String Density (intersections / sq. in.)', 'value': 'String Density (intersections / sq. in.)'},
+					 {'label': 'Swingweight', 'value': 'Swingweight'},
+					 {'label': 'Stiffness', 'value': 'Stiffness'},
+					 {'label': 'Current/Old Models', 'value': 'Current/Old Models'}],
 			value='Beam Width (avg. mm)'
 		),
 	]),
@@ -329,6 +354,12 @@ def update_figure(mfrs, head_size_range, strung_weight_range,
     fig = px.scatter(filtered_df, 
 				 x=x_col, y=y_col, 
                  color=color, hover_name='name',
+                 labels={
+                 	x_col: x_col,
+                 	y_col: y_col,
+                 	color: color.split(' (')[0]
+                 	#color: color.replace(' (','\n\n\n\n(#')
+                 },
                  hover_data=['Head Size (in)',
                  			 'Strung Weight (oz)',
                  			 'Balance (pts)', 
@@ -342,10 +373,6 @@ def update_figure(mfrs, head_size_range, strung_weight_range,
 
     fig.update_traces(marker_size=5)
     fig.update_layout(plot_bgcolor=colors['gray'], paper_bgcolor=colors['black'], font_color=colors['white'])
-
-    # fig = px.scatter(filtered_df, x="gdpPercap", y="lifeExp", 
-    #                  size="pop", color="continent", hover_name="country", 
-    #                  log_x=True, size_max=55)
 
     fig.update_layout(transition_duration=1000)
 

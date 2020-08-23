@@ -4,6 +4,7 @@
     border-top-left-radius: 3px;
     /* background-color: orange; */
     /*padding: 0px 24px;*/
+    padding-bottom: 5px;
     border-bottom: 1px solid #d6d6d6;
 }
 
@@ -21,17 +22,27 @@
     /*display: flex !important;*/
     align-items: center;
     justify-content: center;
+/*    padding-top: 10px;
+    padding-bottom: 10px;*/
 }
 .custom-tab--selected {
     color: #794bc4 !important;
     background-color: #3d3d3d !important;
-    box-shadow: 1px 1px 0px white;
-    border-left: 1px solid lightgrey !important;
-    border-right: 1px solid lightgrey !important;
+    border-left: 1px solid #794bc4 !important;
+    border-right: 1px solid #794bc4 !important;
+    border-bottom: 1px solid #794bc4 !important;
     border-top: 3px solid #794bc4 !important;
+}
+
+.custom-tab:hover {
+    color: lightgrey;
 }
 
 /*.custom-dropdown {
     color: blue !important
     background-color: #d9d9d9 !important
 }*/
+
+.filter-slider {
+    margin-bottom: 25px !important;
+}
