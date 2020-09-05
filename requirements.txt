@@ -14,7 +14,7 @@ itsdangerous==1.1.0
 Jinja2==2.11.2
 joblib==0.16.0
 markupsafe==1.1.1
-mkl-fft==1.1.0
+mkl-fft==1.0.6
 mkl-random==1.1.1
 mkl-service==2.3.0
 numpy==1.19.1
@@ -28,5 +28,5 @@ retrying==1.3.3
 scikit-learn==0.23.2
 scipy==1.5.0
 six==1.15.0
-threadpoolctl
+threadpoolctl==2.1.0
 Werkzeug==1.0.1
