@@ -15,7 +15,7 @@ Jinja2==2.11.2
 joblib==0.16.0
 markupsafe==1.1.1
 mkl-fft==1.0.6
-mkl-random==1.1.1
+mkl-random==1.0.1.1
 mkl-service==2.3.0
 numpy==1.19.1
 pandas==1.1.1
