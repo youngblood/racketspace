@@ -1,8 +1,8 @@
 brotlipy==0.7.0
 certifi==2020.6.20
-cffi @ file:///opt/concourse/worker/volumes/live/199e7db2-0b3a-46e0-4230-da33c5d6c6de/volume/cffi_1598370769235/work
+cffi
 click==7.1.2
-dash @ file:///tmp/build/80754af9/dash_1599164850084/work
+dash
 dash-core-components==1.3.1
 dash-html-components==1.0.1
 dash-renderer==1.1.2
@@ -12,21 +12,21 @@ Flask-Compress==1.5.0
 future==0.18.2
 itsdangerous==1.1.0
 Jinja2==2.11.2
-joblib @ file:///tmp/build/80754af9/joblib_1594236160679/work
-MarkupSafe @ file:///opt/concourse/worker/volumes/live/cb778296-98db-45ad-411e-6f726e102dc3/volume/markupsafe_1594371638608/work
+joblib
+MarkupSafe
 mkl-fft==1.1.0
 mkl-random==1.1.1
 mkl-service==2.3.0
-numpy @ file:///opt/concourse/worker/volumes/live/c646f6b9-b398-438d-7dc7-c7142e0ba44b/volume/numpy_and_numpy_base_1596235504536/work
-pandas @ file:///opt/concourse/worker/volumes/live/905bc214-99a7-4c47-6cae-d63a445c9258/volume/pandas_1598371465625/work
-plotly @ file:///tmp/build/80754af9/plotly_1597716491413/work
-pycparser @ file:///tmp/build/80754af9/pycparser_1594388511720/work
+numpy
+pandas
+plotly
+pycparser
 python-dateutil==2.8.1
 pytz==2020.1
 PyYAML==5.3.1
 retrying==1.3.3
-scikit-learn @ file:///opt/concourse/worker/volumes/live/111833a2-339b-4578-413b-7337bb8fe64a/volume/scikit-learn_1598376920601/work
-scipy @ file:///opt/concourse/worker/volumes/live/7f5e51f8-abf3-4409-4c56-a4fb14cc9869/volume/scipy_1593104185999/work
+scikit-learn
+scipy
 six==1.15.0
-threadpoolctl @ file:///tmp/tmp9twdgx9k/threadpoolctl-2.1.0-py3-none-any.whl
+threadpoolctl
 Werkzeug==1.0.1
