@@ -1,4 +1,8 @@
 Untitled.ipynb
 test_app.py
 .ipynb_checkpoints/
-data/
+data/racquet_specs_old.csv
+venv
+*.pyc
+.env
+.DS_Store
