@@ -1,5 +1,8 @@
+import math
 import numpy as np
 import pandas as pd
+from sklearn.preprocessing import RobustScaler, MinMaxScaler, StandardScaler
+from sklearn.decomposition import PCA
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
@@ -10,9 +13,10 @@ import plotly.express as px
 # external_stylesheets = ['style.css']
 
 app = dash.Dash(__name__)#, external_stylesheets=external_stylesheets)
+server = app.server
 
 # df = pd.read_csv('https://gist.githubusercontent.com/chriddyp/5d1ea79569ed194d432e56108a04d188/raw/a9f9e8076b837d541398e999dcbac2b2826a81f8/gdp-life-exp-2007.csv')	
-raw_df = pd.read_csv('data/racquet_specs.csv')
+raw_df = pd.read_csv('data/racket_specs.csv')
 
 # initial data source filtering (NaNs & erroneous values)
 df = raw_df[(raw_df['Head Size (in)']>=60) & \
@@ -28,7 +32,7 @@ df = raw_df[(raw_df['Head Size (in)']>=60) & \
             (raw_df['Swingweight'] >= 100) & \
             (raw_df['Swingweight'] <= 600) & \
             (raw_df['Stiffness'] >= 10) & \
-            (raw_df['Stiffness'] <= 100)]
+            (raw_df['Stiffness'] <= 100)].copy()
 
 df.rename(columns={'url': 'tw_url', 'img_url': 'tw_img_url'},
 		  inplace=True)
@@ -52,10 +56,26 @@ df['String Density (intersections / sq. in.) jittered'] = df['String Density (in
 df['Swingweight jittered'] = df['Swingweight'].apply(add_jitter, max_jitter=swingweight_jitter)
 df['Stiffness jittered'] = df['Stiffness'].apply(add_jitter, max_jitter=stiffness_jitter)
 
-fields_to_norm = [] # list out all 7 strings of above col names
+# Standardization of Features and PCA
+features_to_norm = ['Head Size (in)', 'Strung Weight (oz)', 'Beam Width (avg. mm)',
+                   'Balance (pts)', 'String Density (intersections / sq. in.)', 
+                   'Swingweight', 'Stiffness']
 
 types_of_norming = {} # min-max-scaler, 
 
+scaler = RobustScaler()
+
+for feature in features_to_norm:
+    df[feature + ' normed'] = scaler.fit_transform(df[feature].values.reshape(-1,1))
+
+normed_features = [feature + ' normed' for feature in features_to_norm]
+
+pca = PCA(n_components=3)
+pca.fit(df[normed_features])
+X_pca = pca.transform(df[normed_features])
+
+for i in range(X_pca.shape[1]):
+    df['Principal Component '+str(i+1)] = X_pca[:,i]
 
 
 colors = {
@@ -66,6 +86,10 @@ colors = {
 	'pink': '#ff00fb',
 	'blue': '#00d0ff'
 }
+
+# Helper function for defining lowest slider marks
+def rounduptonearest(x, base=5):
+    return base * math.ceil(int(x)/base)
 
 # FILL IN URL WHERE BLANK
 def replace_blank_urls_with_ebay(s):
@@ -115,116 +139,130 @@ app.layout = html.Div(style={'padding':"20px"}, children=[
 					),
 				]),
 				html.Div(id='six-slider-filter-div', className='twelve columns', children=[
-					html.Div(className='four columns', style={'margin-left':'15px', 'margin-right':'15px'},
-							 #style={'width': '30%', 'padding': '10px', 'float':'left'},
-							 children=[
-						html.Div(
-							children=[
-								html.Label(children=['Head Size (in)',
-									dcc.RangeSlider(
-										id='head-size-slider',
-										className='filter-slider',
-										min=df['Head Size (in)'].min(),
-										max=df['Head Size (in)'].max(),
-										marks={i: '{}'.format(i) for i in range(70,140,10)},#int(df['Head Size (in)'].min()), int(df['Head Size (in)'].max())+1, 5)},
-										step=0.5,
-										tooltip = { 'always_visible': False },
-										value=[df['Head Size (in)'].min(), df['Head Size (in)'].max()]
-									),
-								]),
-								
-							]
-						),
-						html.Div(
-							children=[
-								html.Label(children=['Strung Weight (oz)',
-									dcc.RangeSlider(
-										id='strung-weight-slider',
-										className='filter-slider',
-										min=df['Strung Weight (oz)'].min(),
-										max=df['Strung Weight (oz)'].max(),
-										marks={i: '{}'.format(i) for i in range(int(df['Strung Weight (oz)'].min()), int(df['Strung Weight (oz)'].max())+1)},
-										step=0.25,
-										tooltip = { 'always_visible': False },
-										value=[df['Strung Weight (oz)'].min(), df['Strung Weight (oz)'].max()]
-									)
-								]),
-							]
-						),
-					]),
-
-					html.Div(className='four columns', style={'margin-left':'15px', 'margin-right':'15px'},
-							 children=[
-						html.Div(
-							children=[
-								html.Label(children=['Balance (pts HL/HH)',
-									dcc.RangeSlider(
-										id='balance-slider',
-										className='filter-slider',
-										min=df['Balance (pts)'].min(),
-										max=df['Balance (pts)'].max(),
-										marks={i: '{} HL'.format(i) if i <0  else '{} HH'.format(i) for i in range(int(df['Balance (pts)'].min()), int(df['Balance (pts)'].max())+1, 5)},
-										step=0.5,
-										tooltip = { 'always_visible': False },
-										value=[df['Balance (pts)'].min(), df['Balance (pts)'].max()]
-									)
-								]),
-							]
-						),
-						html.Div(
-							children=[
-								html.Label(children=['Beam Width (avg. mm)',
-									dcc.RangeSlider(
-										id='beam-width-slider',
-										className='filter-slider',
-										min=df['Beam Width (avg. mm)'].min(),
-										max=df['Beam Width (avg. mm)'].max(),
-										marks={i: '{}'.format(i) for i in range(int(df['Beam Width (avg. mm)'].min()), int(df['Beam Width (avg. mm)'].max())+1, 2)},
-										step=0.5,
-										tooltip = { 'always_visible': False },
-										value=[df['Beam Width (avg. mm)'].min(), df['Beam Width (avg. mm)'].max()]
-									)
-								]),
-							]
-						),
-					]),
 					
-					html.Div(className='four columns', style={'margin-left':'15px', 'margin-right':'15px'},
-							 children=[
-						html.Div(
-							children=[
-								html.Label(children=['String Density (X/in.²)',
-									dcc.RangeSlider(
-										id='string-density-slider',
-										className='filter-slider',
-										min=1.8,
-										max=4.2,
-										marks={2: '2', 3: '3', 4: '4'},
-										step=0.1,
-										tooltip = { 'always_visible': False },
-										value=[1.8, 4.2]
-									)
-								]),
-								
-							]
-						),
-						html.Div(
-							children=[
-								html.Label(children=['Swingweight',
-									dcc.RangeSlider(
-										id='swingweight-slider',
-										className='filter-slider',
-										min=1.8,
-										max=4.2,
-										marks={2: '2', 3: '3', 4: '4'},
-										step=0.1,
-										tooltip = { 'always_visible': False },
-										value=[1.8, 4.2]
-									)
-								]),
-							]
-						),
-					]),	
+					html.Div(className='four columns', style={'padding-left':'15px', 'padding-right':'15px'},
+						children=[
+							html.Label(children=['Head Size (in)',
+								dcc.RangeSlider(
+									id='head-size-slider',
+									className='filter-slider',
+									min=df['Head Size (in)'].min(),
+									max=df['Head Size (in)'].max(),
+									marks={i: '{}'.format(i) for i in range(rounduptonearest(df['Head Size (in)'].min(),10),
+																			int(df['Head Size (in)'].max()),
+																			10)},
+									step=0.5,
+									tooltip = { 'always_visible': False },
+									value=[df['Head Size (in)'].min(), df['Head Size (in)'].max()]
+								),
+							]),
+							
+						]
+					),
+
+					html.Div(className='four columns', style={'padding-left':'15px', 'padding-right':'15px'},
+						children=[
+							html.Label(children=['Strung Weight (oz)',
+								dcc.RangeSlider(
+									id='strung-weight-slider',
+									className='filter-slider',
+									min=df['Strung Weight (oz)'].min(),
+									max=df['Strung Weight (oz)'].max(),
+									marks={i: '{}'.format(i) for i in range(int(df['Strung Weight (oz)'].min()), int(df['Strung Weight (oz)'].max())+1)},
+									step=0.25,
+									tooltip = { 'always_visible': False },
+									value=[df['Strung Weight (oz)'].min(), df['Strung Weight (oz)'].max()]
+								)
+							]),
+						]
+					),
+
+					html.Div(className='four columns', style={'padding-left':'15px', 'padding-right':'15px'},
+						children=[
+							html.Label(children=['Balance (pts HL/HH)',
+								dcc.RangeSlider(
+									id='balance-slider',
+									className='filter-slider',
+									min=df['Balance (pts)'].min(),
+									max=df['Balance (pts)'].max(),
+									marks={i: '{} HL'.format(i) if i <0  else '{} HH'.format(i) for i in range(int(df['Balance (pts)'].min()), int(df['Balance (pts)'].max())+1, 5)},
+									step=0.5,
+									tooltip = { 'always_visible': False },
+									value=[df['Balance (pts)'].min(), df['Balance (pts)'].max()]
+								)
+							]),
+						]
+					),
+
+					html.Div(className='four columns', style={'padding-left':'15px', 'padding-right':'15px'},
+						children=[
+							html.Label(children=['Beam Width (avg. mm)',
+								dcc.RangeSlider(
+									id='beam-width-slider',
+									className='filter-slider',
+									min=df['Beam Width (avg. mm)'].min(),
+									max=df['Beam Width (avg. mm)'].max(),
+									marks={i: '{}'.format(i) for i in range(int(math.ceil(df['Beam Width (avg. mm)'].min())), int(df['Beam Width (avg. mm)'].max())+1, 3)},
+									step=0.5,
+									tooltip = { 'always_visible': False },
+									value=[df['Beam Width (avg. mm)'].min(), df['Beam Width (avg. mm)'].max()]
+								)
+							]),
+						]
+					),
+
+					html.Div(className='four columns', style={'padding-left':'15px', 'padding-right':'15px'},
+						children=[
+							html.Label(children=['String Density (X/in.²)',
+								dcc.RangeSlider(
+									id='string-density-slider',
+									className='filter-slider',
+									min=1.8,
+									max=4.2,
+									marks={2: '2', 3: '3', 4: '4'},
+									step=0.1,
+									tooltip = { 'always_visible': False },
+									value=[1.8, 4.2]
+								)
+							]),
+							
+						]
+					),
+
+					html.Div(className='four columns', style={'padding-left':'15px', 'padding-right':'15px'},
+						children=[
+							html.Label(children=['Swingweight',
+								dcc.RangeSlider(
+									id='swingweight-slider',
+									className='filter-slider',
+									min=df['Swingweight'].min(),
+									max=df['Swingweight'].max(),
+									marks={i: '{}'.format(i) for i in range(rounduptonearest(df['Swingweight'].min(),50), int(df['Swingweight'].max())+1, 50)},
+									step=1,
+									tooltip = { 'always_visible': False },
+									value=[df['Swingweight'].min(), df['Swingweight'].max()]
+								)
+							]),
+						]
+					),
+
+					html.Div(className='four columns', style={'padding-left':'15px', 'padding-right':'15px'},
+						children=[
+							html.Label(children=['Stiffness',
+								dcc.RangeSlider(
+									id='stiffness-slider',
+									className='filter-slider',
+									min=df['Stiffness'].min(),
+									max=df['Stiffness'].max(),
+									marks={i: '{}'.format(i) for i in range(rounduptonearest(df['Stiffness'].min(),10), int(df['Stiffness'].max())+1, 10)},
+									step=1,
+									tooltip = { 'always_visible': False },
+									value=[df['Stiffness'].min(), df['Stiffness'].max()]
+								)
+							]),
+						]
+					),
+	
 				]),				
 			]), 
 		]),
@@ -291,7 +329,8 @@ app.layout = html.Div(style={'padding':"20px"}, children=[
 					 {'label': 'String Density (intersections / sq. in.)', 'value': 'String Density (intersections / sq. in.)'},
 					 {'label': 'Swingweight', 'value': 'Swingweight'},
 					 {'label': 'Stiffness', 'value': 'Stiffness'},
-					 {'label': 'Current/Old Models', 'value': 'Current/Old Models'}],
+					 {'label': 'Current/Old Models', 'value': 'Current/Old Models'},
+					 {'label': 'Principal Component 3', 'value': 'Principal Component 3'}],
 			value='Beam Width (avg. mm)'
 		),
 	]),
@@ -317,14 +356,18 @@ def select_all_mfrs(select_all):
      Input('balance-slider', 'value'),
      Input('beam-width-slider', 'value'),
      Input('string-density-slider', 'value'),
+     Input('swingweight-slider', 'value'),
+     Input('stiffness-slider', 'value'),
      Input('jitter-checkbox', 'value'),
      Input('current-models-only-checkbox', 'value'),
+     Input('tabs', 'value'),
      Input('x-axis-dropdown', 'value'),
      Input('y-axis-dropdown', 'value'),
      Input('color-dropdown', 'value')])
 def update_figure(mfrs, head_size_range, strung_weight_range,
-				  balance_range, beam_width_range, string_density_range, jitter, 
-				  current_models_only, x_axis, y_axis, color):
+				  balance_range, beam_width_range, string_density_range, 
+				  swingweight_range, stiffness_range, jitter, 
+				  current_models_only, tabs, x_axis, y_axis, color):
 
     current_model_states = ['Current Model'] if current_models_only else \
     					   ['Current Model', 'Old Model']
@@ -340,13 +383,25 @@ def update_figure(mfrs, head_size_range, strung_weight_range,
     				 (df['Beam Width (avg. mm)'] >= beam_width_range[0]) & \
     				 (df['Beam Width (avg. mm)'] <= beam_width_range[1]) & \
     				 (df['String Density (intersections / sq. in.)'] >= string_density_range[0]) & \
-    				 (df['String Density (intersections / sq. in.)'] <= string_density_range[1])]
+    				 (df['String Density (intersections / sq. in.)'] <= string_density_range[1]) & \
+    				 (df['Swingweight'] >= swingweight_range[0]) & \
+    				 (df['Swingweight'] <= swingweight_range[1]) & \
+    				 (df['Stiffness'] >= stiffness_range[0]) & \
+    				 (df['Stiffness'] <= stiffness_range[1])]
 
     # if PCA, then use those axes
+    if tabs == 'tab-1':
+    	x_col = (x_axis + ' jittered') if jitter else x_axis
+    	y_col = (y_axis + ' jittered') if jitter else y_axis
+    elif tabs == 'tab-2':
+    	x_col = 'Principal Component 1'
+    	y_col = 'Principal Component 2'
+    else:
+    	raise Exception('invalid tab setting')
+
     # elif jitter, then use jittered versions
     # else use regular versions...
-    x_col = (x_axis + ' jittered') if jitter else x_axis
-    y_col = (y_axis + ' jittered') if jitter else y_axis
+    
 
     # Calculate base PCA columns if first time calling the function
 

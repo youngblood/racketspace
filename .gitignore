@@ -6,3 +6,4 @@ venv
 *.pyc
 .env
 .DS_Store
+old*
