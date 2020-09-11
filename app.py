@@ -105,7 +105,7 @@ app.layout = html.Div(style={'padding':"20px"}, children=[
 	html.Div(className='twelve columns', children=[ 
 		html.H1(children=[
 							html.Img(src=app.get_asset_url('logo.png'),height=50),
-							'RACKETSPACE', 
+							'RACKETSPACE',
 						 ],
 		)],
 	),
@@ -117,7 +117,7 @@ app.layout = html.Div(style={'padding':"20px"}, children=[
 	    	
 	    	html.Div(style={'padding':"0px"}, children=[
 				html.Div(className='twelve columns', children=[ 
-					html.Label('Manufacturers',style={'float':'left', 'margin-bottom':'2px'}),
+					html.Label('Manuacturers',style={'float':'left', 'margin-bottom':'2px'}),
 					html.Button('Select All', id='select-all-btn', n_clicks=0, style={'float':'left','padding':'2px','margin-left':'5px', 'margin-top':'5px'}), # 
 					dcc.Dropdown(
 						className='twelve columns',
