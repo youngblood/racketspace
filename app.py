@@ -14,6 +14,7 @@ import plotly.express as px
 
 app = dash.Dash(__name__)#, external_stylesheets=external_stylesheets)
 server = app.server
+app.title = "RacketSpace"
 
 # df = pd.read_csv('https://gist.githubusercontent.com/chriddyp/5d1ea79569ed194d432e56108a04d188/raw/a9f9e8076b837d541398e999dcbac2b2826a81f8/gdp-life-exp-2007.csv')	
 raw_df = pd.read_csv('data/racket_specs.csv')
@@ -101,17 +102,17 @@ df['url'] = df[['tw_url','name']].apply(replace_blank_urls_with_ebay, axis=1)
 df['Current/Old Models'] = df['tw_url'].apply(lambda x: \
 	'Current Model' if type(x) == str and x != '' else 'Old Model')
 
-app.layout = html.Div(style={'padding':"20px"}, children=[
-	html.Div(className='twelve columns', children=[ 
+app.layout = html.Div(style={'padding':"10px"}, children=[
+	html.Div(className='twelve columns', children=[
 		html.H1(children=[
-							html.Img(src=app.get_asset_url('logo.png'),height=50),
+							html.Img(src=app.get_asset_url('logo.png'), height=32),
 							'RACKETSPACE',
 						 ],
 		)],
 	),
 
 
-	html.Div(id='filters-div', className='twelve columns', style={'outline': '1px solid #794bc4', 'padding':'10px'}, children=[ 
+	html.Div(id='filters-div', className='twelve columns', style={'outline': '1px solid #794bc4', 'padding':'10px'}, children=[
 		html.Details(children=[ 
 	    	html.Summary('Filters',style={'color':colors['purple'],'outline':'none'}),#children=[html.Label('Filters')]),
 	    	
@@ -269,12 +270,12 @@ app.layout = html.Div(style={'padding':"20px"}, children=[
 	]),
 	html.Br(),
 	html.Br(),
-	html.Div(className='three columns', id='settings', style={'outline': '1px solid #794bc4','margin-top':'20px','padding':'10px'}, children=[
+	html.Div(className='three columns', id='settings', style={'outline': '1px solid #794bc4','margin-top':'20px','padding':'10px', 'margin-right':'20px'}, children=[
 		dcc.Tabs(id="tabs", value='tab-1', parent_className='custom-tabs', className='custom-tabs-container', children=[
 	        dcc.Tab(label='Choose Axes', value='tab-1', className='custom-tab',
             		selected_className='custom-tab--selected',
             		children=[
-	        	html.Label('X-Axis'),
+	        	html.Label('X-Axis', style={'margin-top':'10px'}),
 				dcc.Dropdown(
 					id='x-axis-dropdown',
 					className='custom-dropdown',
@@ -289,8 +290,7 @@ app.layout = html.Div(style={'padding':"20px"}, children=[
 							 {'label': 'Current/Old Models', 'value': 'Current/Old Models'}],
 					value='Head Size (in)'
 				),
-				html.Br(),  
-				html.Label('Y-Axis'),
+				html.Label('Y-Axis', style={'margin-top':'10px'}),
 				dcc.Dropdown(
 					id='y-axis-dropdown',
 					className='custom-dropdown',
@@ -305,19 +305,28 @@ app.layout = html.Div(style={'padding':"20px"}, children=[
 							 {'label': 'Current/Old Models', 'value': 'Current/Old Models'}],
 					value='Strung Weight (oz)'
 				),
-				html.Br(),  
 				dcc.Checklist(
 					    id='jitter-checkbox',
 					    options=[{'label': 'Jitter', 'value': 'True'}],
-					    value=[]
+					    value=[],
+						style={'margin-top':'10px'}
 				),
 	        ]),
-	        dcc.Tab(label='PCA', value='tab-2',className='custom-tab',
-            		selected_className='custom-tab--selected'),
+	        dcc.Tab(label='Combine Axes', value='tab-2',className='custom-tab',
+            		selected_className='custom-tab--selected', children=[
+				html.Label('Dimensionality Reduction Type', style={'margin-top':'10px'}),
+				dcc.Dropdown(
+					id='dim-red-algo-dropdown',
+					className='custom-dropdown',
+					style={'background-color':colors['white'], 'color':colors['black'], 'border-radius':'4px'},
+					options=[{'label': 'PCA', 'value': 'PCA'},
+							 {'label': 't-SNE', 'value': 't-SNE'}],
+					value='PCA'
+				),
+			]),
 
 	    ]),
-		html.Br(),  
-		html.Label('Color'),
+		html.Label('Color', style={'margin-top':'10px'}),
 	    dcc.Dropdown(
 			id='color-dropdown',
 			style={'background-color':colors['white'], 'color':colors['black'], 'border-radius':'4px'},
@@ -334,7 +343,7 @@ app.layout = html.Div(style={'padding':"20px"}, children=[
 			value='Beam Width (avg. mm)'
 		),
 	]),
-	html.Div(className='nine columns', id='graph-div', style={'outline': '1px solid #794bc4','margin-top':'20px', 'margin-left':'20px'}, children=[
+	html.Div(className='nine columns', id='graph-div', style={'outline': '1px solid #794bc4','margin-top':'20px'}, children=[
 		dcc.Graph(
 	        id='racquetspace_graph',
 	    ),
