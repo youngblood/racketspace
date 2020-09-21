@@ -64,33 +64,22 @@ df['String Density (X / sq. in.) jittered'] = df['String Density (X / sq. in.)']
 df['Swingweight jittered'] = df['Swingweight'].apply(add_jitter, max_jitter=swingweight_jitter)
 df['Stiffness jittered'] = df['Stiffness'].apply(add_jitter, max_jitter=stiffness_jitter)
 
-# Standardization of Features and PCA
+# Creating columns to hold standardized and PC values
 features_to_norm = ['Head Size (in)',
 					'Strung Weight (oz)',
 					'Balance (pts)',
-					# 'Stiffness',
-					# 'Beam Width (avg. mm)',
-					# 'String Density (X / sq. in.)',
-                    # 'Swingweight',
-					]
-
-types_of_norming = {} # min-max-scaler, 
-
-scaler = RobustScaler()
+					'Stiffness',
+					'Beam Width (avg. mm)',
+					'String Density (X / sq. in.)',
+					'Swingweight',]
 
 for feature in features_to_norm:
-    df[feature + ' normed'] = scaler.fit_transform(df[feature].values.reshape(-1,1))
+	df[feature + ' normed'] = 0
 
-normed_features = [feature + ' normed' for feature in features_to_norm]
+for i in [1,2,3]:
+	df['Principal Component '+str(i)] = 0
 
-pca = PCA(n_components=3)
-pca.fit(df[normed_features])
-X_pca = pca.transform(df[normed_features])
-
-for i in range(X_pca.shape[1]):
-    df['Principal Component '+str(i+1)] = X_pca[:,i]
-
-
+# Defining a color palette
 colors = {
 	'black': 'black',
 	'white': '#d9d9d9',
@@ -131,7 +120,8 @@ app.layout = html.Div(style={'padding':"10px"}, children=[
 	    	html.Div(style={'padding':"0px"}, children=[
 				html.Div(className='twelve columns', children=[ 
 					html.Label('Manuacturers',style={'float':'left', 'margin-bottom':'2px'}),
-					html.Button('Select All', id='select-all-btn', n_clicks=0, style={'float':'left','padding':'2px','margin-left':'5px', 'margin-top':'5px'}), # 
+					html.Button('All', id='select-all-btn', n_clicks=0, style={'float':'left','padding':'2px','margin-left':'5px', 'margin-top':'5px'}), #
+					html.Button('None', id='select-none-btn', n_clicks=0, style={'float':'left','padding':'2px','margin-left':'5px', 'margin-top':'5px'}),
 					dcc.Dropdown(
 						className='twelve columns',
 						id='mfr-dropdown',
@@ -354,6 +344,21 @@ app.layout = html.Div(style={'padding':"10px"}, children=[
 					 {'label': 'Principal Component 3', 'value': 'Principal Component 3'}],
 			value='Balance (pts)'
 		),
+		html.Label('Axes to Use for Similarity (Below) and Combined Axes Plots', style={'margin-top':'10px'}),
+		dcc.Checklist(
+			id='axes-checklist',
+			options=[
+				{'label': 'Head Size (in)', 'value': 'Head Size (in)'},
+				{'label': 'Strung Weight (oz)', 'value': 'Strung Weight (oz)'},
+				{'label': 'Balance (pts)', 'value': 'Balance (pts)'},
+				{'label': 'Stiffness', 'value': 'Stiffness'},
+				{'label': 'Beam Width (avg. mm)', 'value': 'Beam Width (avg. mm)'},
+				{'label': 'Swingweight', 'value': 'Swingweight'},
+				{'label': 'String Density (intersections / sq. in.)', 'value': 'String Density (X / sq. in.)'},
+			],
+			value=['Head Size (in)', 'Strung Weight (oz)', 'Balance (pts)', 'Stiffness', 'Beam Width (avg. mm)',
+				   'Swingweight', 'String Density (X / sq. in.)']
+		),
 	]),
 	html.Div(className='nine columns', id='graph-div', style={'outline': '1px solid #794bc4','margin-top':'20px'}, children=[
 		dcc.Graph(
@@ -399,13 +404,47 @@ app.layout = html.Div(style={'padding':"10px"}, children=[
 	            """),
 		html.Pre(id='click-data'),
 	], className='nine columns'),
+	html.Div(id='hidden-div', style={'display':'none'}),
 ])
 
 @app.callback(
 	Output('mfr-dropdown', 'value'),
-	[Input('select-all-btn', 'n_clicks')])
-def select_all_mfrs(select_all):
-	return sorted(list(df['Manufacturer'].unique()))
+	[Input('select-all-btn', 'n_clicks'),
+	 Input('select-none-btn', 'n_clicks')])
+def select_all_none_mfrs(select_all, select_none):
+	ctx = dash.callback_context # see which input triggered the callback
+	if ctx.triggered[0]['prop_id'].split('.')[0] == 'select-all-btn' or not ctx.triggered:
+		return sorted(list(df['Manufacturer'].unique()))
+	else:
+		return []
+
+@app.callback(
+	Output('hidden-div', 'children'),
+	[Input('axes-checklist', 'value')])
+def update_reduced_dimensions(axes_checklist):
+	# types_of_norming = {}  # min-max-scaler,
+	if len(axes_checklist) < 3:
+		df['Principal Component 3'] = 0
+	if len(axes_checklist) < 2:
+		df['Principal Component 2'] = 0
+	if len(axes_checklist) < 1:
+		df['Principal Component 1'] = 0
+	else:
+		scaler = RobustScaler()
+
+		for feature in axes_checklist:
+			df[feature + ' normed'] = scaler.fit_transform(df[feature].values.reshape(-1, 1))
+
+		normed_features = [feature + ' normed' for feature in axes_checklist]
+
+		pca = PCA(n_components=min(3,len(axes_checklist)))
+		pca.fit(df[normed_features])
+		X_pca = pca.transform(df[normed_features])
+
+		for i in range(X_pca.shape[1]):
+			df['Principal Component ' + str(i + 1)] = X_pca[:, i]
+
+	return None
 
 @app.callback(
     Output('racquetspace_graph', 'figure'),
@@ -422,11 +461,12 @@ def select_all_mfrs(select_all):
      Input('tabs', 'value'),
      Input('x-axis-dropdown', 'value'),
      Input('y-axis-dropdown', 'value'),
-     Input('color-dropdown', 'value')])
+     Input('color-dropdown', 'value'),
+	 Input('axes-checklist', 'value')])
 def update_scatter(mfrs, head_size_range, strung_weight_range,
 				  balance_range, beam_width_range, string_density_range, 
 				  swingweight_range, stiffness_range, jitter, 
-				  current_models_only, tabs, x_axis, y_axis, color):
+				  current_models_only, tabs, x_axis, y_axis, color, axes_checklist):
 
     current_model_states = ['Current Model'] if current_models_only else \
     					   ['Current Model', 'Old Model']
@@ -474,13 +514,7 @@ def update_scatter(mfrs, head_size_range, strung_weight_range,
                  	color: color.split(' (')[0]
                  	#color: color.replace(' (','\n\n\n\n(#')
                  },
-                 hover_data=['ID',
-							 'Head Size (in)',
-                 			 'Strung Weight (oz)',
-                 			 'Balance (pts)', 
-                 			 'Beam Width (avg. mm)',
-                 			 'url', 
-                 			 ],
+                 hover_data= ['ID'] + axes_checklist,
                  opacity=1.0,
                  color_continuous_scale=[colors['pink'], colors['blue']],
                  color_discrete_sequence=[colors['pink'], colors['blue']])#, 
@@ -496,10 +530,6 @@ def update_scatter(mfrs, head_size_range, strung_weight_range,
 @app.callback(
 	Output('model-dropdown', 'value'),
 	[Input('racquetspace_graph', 'clickData')])
-	 # Input('tabs', 'value'),
-	 # Input('x-axis-dropdown', 'value'),
-	 # Input('y-axis-dropdown', 'value'),
-	 # Input('color-dropdown', 'value')])
 def click_overwrite_search(clickData):
 	try:
 		return clickData['points'][0]['hovertext']
@@ -511,16 +541,18 @@ def calculate_distance(inputs, targets):
 
 @app.callback(
 	Output('selected-rackets-table', 'data'),
-	[Input('model-dropdown', 'value')])
-def select_racket_table(model_dropdown):
+	[Input('model-dropdown', 'value'),
+	 Input('axes-checklist', 'value')])
+def select_racket_table(model_dropdown, axes_checklist):
 	try:
 		id = int(df[df['Model'] == model_dropdown]['ID'])
 		# df['Distance'] = id
-		x = float(df[df['ID'] == id]['Principal Component 1'])
-		y = float(df[df['ID'] == id]['Principal Component 2'])
-		z = float(df[df['ID'] == id]['Principal Component 3'])
-		df['Distance'] = df[['Principal Component 1', 'Principal Component 2', 'Principal Component 3']].apply(
-			calculate_distance, targets=[x, y, z], axis=1)
+		# x = float(df[df['ID'] == id]['Principal Component 1'])
+		# y = float(df[df['ID'] == id]['Principal Component 2'])
+		# z = float(df[df['ID'] == id]['Principal Component 3'])
+		targets = [float(df[df['ID'] == id][axis]) for axis in axes_checklist]
+		df['Distance'] = df[axes_checklist].apply(
+			calculate_distance, targets=targets, axis=1)
 		return df.sort_values("Distance").head(10).to_dict('records')
 	except TypeError:
 		return None
