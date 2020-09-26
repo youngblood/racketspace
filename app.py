@@ -19,7 +19,7 @@ import plotly.express as px
 
 app = dash.Dash(__name__)#, external_stylesheets=external_stylesheets)
 server = app.server
-app.title = "RktSpc"
+app.title = "RacketSpace"
 
 # df = pd.read_csv('https://gist.githubusercontent.com/chriddyp/5d1ea79569ed194d432e56108a04d188/raw/a9f9e8076b837d541398e999dcbac2b2826a81f8/gdp-life-exp-2007.csv')	
 raw_df = pd.read_csv('data/racket_specs.csv')
@@ -104,14 +104,26 @@ def rounduptonearest(x, base=5):
     return base * math.ceil(int(x)/base)
 
 # FILL IN URL WHERE BLANK
-def replace_blank_urls_with_ebay(s):
-    return s[0] if type(s[0]) == str and s[0] != '' else \
-        'https://www.ebay.com/sch/i.html?_nkw={}'.format(s[1].replace(' ','+'))
+def replace_blank_urls_with_ebay(inputs):
+    return inputs[0] if type(inputs[0]) == str and inputs[0] != '' else \
+        'https://www.ebay.com/sch/i.html?_nkw={}'.format(inputs[1].replace(' ','+'))
 
 df['url'] = df[['tw_url','Model']].apply(replace_blank_urls_with_ebay, axis=1)
 
+
+
+
 df['Current/Old Models'] = df['tw_url'].apply(lambda x: \
     'Current Model' if type(x) == str and x != '' else 'Old Model')
+
+def generate_buy_link(inputs):
+    text = "TW" if inputs[0] == 'Current Model' else 'eBay'
+    link = '['+text+'](' + inputs[1] + ')'
+    return link
+
+# new column for 'link'
+df['link'] = df[['Current/Old Models','url']].apply(generate_buy_link, axis=1)
+
 
 app.layout = html.Div(style={'padding':"10px"}, children=[
     html.Div(className='twelve columns', children=[
@@ -320,7 +332,7 @@ app.layout = html.Div(style={'padding':"10px"}, children=[
                 dcc.Checklist(
                         id='jitter-checkbox',
                         options=[{'label': 'Jitter', 'value': 'True'}],
-                        value=[],
+                        value=['True'],
                         style={'margin-top':'10px'}
                 ),
             ]),
@@ -393,17 +405,23 @@ app.layout = html.Div(style={'padding':"10px"}, children=[
             id='selected-rackets-table',
             columns=[
 				# {'name': 'ID', 'id': 'ID'},
-				{'name': 'Distance', 'id': 'Distance','format': Format(precision=0,scheme=Scheme.fixed)},
+				{'name': 'Distance', 'id': 'Distance', 'type': 'numeric', 'format': Format(
+                    scheme=Scheme.fixed,
+                    precision=3,)},
 				{'name': 'Manufacturer', 'id': 'Manufacturer',},
 				{'name': 'Model', 'id': 'Model'},
 				{'name': 'Head Size (in)', 'id': 'Head Size (in)'},
 				{'name': 'Strung Weight (oz)', 'id': 'Strung Weight (oz)'},
 				{'name': 'Balance (pts)', 'id': 'Balance (pts)'},
 				{'name': 'Stiffness', 'id': 'Stiffness'},
-				{'name': 'Beam Width (avg. mm)', 'id': 'Beam Width (avg. mm)'},
+				{'name': 'Beam Width (avg. mm)', 'id': 'Beam Width (avg. mm)', 'type': 'numeric', 'format': Format(
+                    scheme=Scheme.fixed,
+                    precision=2,)},
                 {'name': 'Swingweight', 'id': 'Swingweight'},
-				{'name': 'String Density (X/in2)', 'id': 'String Density (X/in2)'},
-				{'name': 'url', 'id': 'url'},
+				{'name': 'String Density (X/in2)', 'id': 'String Density (X/in2)', 'type': 'numeric', 'format': Format(
+                    scheme=Scheme.fixed,
+                    precision=3,)},
+				{'name': 'link', 'id': 'link', 'presentation':'markdown'},
                 # {"name": i, "id": i}
                 # for i in [#"ID", # TODO: hide this one
                 #           "Distance",
