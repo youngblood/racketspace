@@ -619,17 +619,13 @@ def calculate_distance(inputs, targets):
     [Input('model-dropdown', 'value'),
      Input('axes-checklist', 'value')])
 def select_racket_table(model_dropdown, axes_checklist):
-    try:
-        id = int(df[df['Model'] == model_dropdown]['ID'])
-        # df['Distance'] = id
-        # x = float(df[df['ID'] == id]['Principal Component 1'])
-        # y = float(df[df['ID'] == id]['Principal Component 2'])
-        # z = float(df[df['ID'] == id]['Principal Component 3'])
+    if model_dropdown:
+        id = int(df[df['Model'] == model_dropdown]['ID'].values[0])
         targets = [float(df[df['ID'] == id][axis]) for axis in axes_checklist]
         df['Distance'] = df[axes_checklist].apply(
             calculate_distance, targets=targets, axis=1)
         return df.sort_values("Distance").head(10).to_dict('records')
-    except TypeError:
+    else:
         return None
 
 # @app.callback(
