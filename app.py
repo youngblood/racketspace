@@ -147,18 +147,11 @@ app.layout = html.Div(style={'margin':'0px','padding':"0px"},children=[
         html.Details(children=[
             html.Summary('Filters',style={'color':colors['purple'],'outline':'none'}),
             html.Div(style={'padding':"0px"}, children=[
-                html.Div(id='manufacturers-div',style={'padding-left':'20px','padding-right':'20px'},children=[
-                    dcc.Checklist(
-                        id='current-models-only-checkbox',
-                        options=[
-                            {'label': 'Current Models Only', 'value': 'True'},
-                        ],
-                        style={'margin-top': '5px', 'margin-bottom': '5px'},
-                        value=[]
-                    ),
-                    html.Label(style={'color':colors['purple'],'margin-bottom':'1px', 'margin-top':'3px'},children=['Manufacturers',
-                        html.Button('All', id='select-all-btn', style={'float':'left','padding':'2px','margin-left':'5px', 'margin-top':'3px','margin-bottom':'1px'}),
-                        html.Button('None', id='select-none-btn', style={'float':'left','padding':'2px','margin-left':'5px', 'margin-top':'3px','margin-bottom':'1px'}),
+                html.Div(className='twelve columns',children=[
+                    html.Label(style={'float':'left','margin-bottom':'1px', 'padding-top':'3px','color':colors['black']},children=["V",
+                        html.P('Manufacturers',style={'float':'left','padding-top':'5px','color':colors['purple']}),
+                        html.Button('All', id='select-all-btn', n_clicks=0, style={'float':'left','padding':'2px','margin-left':'5px','margin-top':'3px','margin-bottom':'1px'}),
+                        html.Button('None', id='select-none-btn', n_clicks=0, style={'float':'left','padding':'2px','margin-left':'5px','margin-top':'3px','margin-bottom':'1px'}),
                         dcc.Dropdown(
                             # className='twelve columns',
                             id='mfr-dropdown',
@@ -166,6 +159,14 @@ app.layout = html.Div(style={'margin':'0px','padding':"0px"},children=[
                             multi=True,
                             style={'border-radius':'4px'}, # 'background-color':colors['white'], 'color':colors['black'],
                             value=sorted(list(df['Manufacturer'].unique())),
+                        ),
+                        dcc.Checklist(
+                            id='current-models-only-checkbox',
+                            options=[
+                                {'label': 'Current Models Only', 'value': 'True'},
+                            ],
+                            style={'margin-top': '5px', 'margin-bottom': '5px'},
+                            value=[]
                         ),
                     ]),
                 ]),
@@ -482,7 +483,7 @@ app.layout = html.Div(style={'margin':'0px','padding':"0px"},children=[
             id='racquetspace_graph',
         ),
     ]),
-    html.Div(className='twelve columns',id='table-div',style={'outline': '1px solid #794bc4','margin-top':'20px','padding':'10px'}, children=[
+    html.Div(className='twelve columns inner-border',id='table-div', children=[
         html.Label('Click a racket in the graph above or search for one below to see details and most similar rackets.', style={'margin-top':'10px'}),
         dcc.Dropdown(
             id='model-dropdown',
@@ -653,7 +654,7 @@ def update_scatter(mfrs, head_size_range, strung_weight_range,
                     #color: color.replace(' (','\n\n\n\n(#')
                  },
                  # title='Showing ' + str(len(filtered_df)) + ' Rackets',
-				 height=400,
+				 height=463,
                  # go.layout(margin=dict(t=50)),
                  hover_data= ['ID'] + axes_checklist,
                  opacity=1.0,
@@ -697,27 +698,6 @@ def select_racket_table(model_dropdown, axes_checklist):
         return df.sort_values("Distance").head(10).to_dict('records')
     else:
         return None
-
-# @app.callback(
-#     Output('racquetspace_graph', 'hoverData'),
-#     [Input('model-dropdown', 'value')])
-# def update_chart_hover(model_dropdown):
-# 	if model_dropdown:
-# 		{
-# 			"points": [
-# 				{
-# 					"curveNumber": 0,
-# 					"pointNumber": int(df[df['Model'] == model_dropdown]['ID']),
-# 					"pointIndex": int(df[df['Model'] == model_dropdown]['ID']),
-# 					"x": int(df[df['Model'] == model_dropdown]['t-SNE 1']),
-# 					"y": int(df[df['Model'] == model_dropdown]['t-SNE 2']),
-# 					"customdata": [
-# 					]
-# 				}
-# 			]
-# 		}
-# 	else:
-# 		return {}
 
 # @app.callback(
 #     Output('click-data', 'children'),
