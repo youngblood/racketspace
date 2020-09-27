@@ -124,36 +124,30 @@ def generate_buy_link(inputs):
 # new column for 'link'
 df['link'] = df[['Current/Old Models','url']].apply(generate_buy_link, axis=1)
 
+filter_histogram_layout = {'xaxis':{'showticklabels':False},
+                           'yaxis':{'showticklabels':False},
+                           'height':30,
+                           'margin':dict(l=25, r=25, t=0, b=3),
+                           'plot_bgcolor':colors['black'],
+                           'paper_bgcolor':colors['black']}
 
-app.layout = html.Div(style={'padding':"10px"}, children=[
-    html.Div(className='twelve columns', children=[
+
+app.layout = html.Div(style={'margin':'0px','padding':"0px"},children=[
+    html.Div(className='twelve columns', style={'padding-left':'10px'}, children=[
         html.H1(children=[
-                            html.Img(src=app.get_asset_url('logo.png'), height=32),
-                            'RACKETSPACE',
-                         ],
-        )],
+            html.Img(src=app.get_asset_url('logo.png'), height=32),
+            'RACKETSPACE',
+        ])],
     ),
 
-
-    html.Div(id='filters-div', className='twelve columns', style={'outline': '1px solid #794bc4', 'padding':'10px'}, children=[
+    html.Div(id='filters-div',
+             className='twelve columns inner-border',
+             # style={'outline': '1px solid #794bc4','outline-offset':'-10px','padding-top':'13px','padding-bottom':'13px'},
+             children=[
         html.Details(children=[
-            html.Summary('Filters',style={'color':colors['purple'],'outline':'none'}),#children=[html.Label('Filters')]),
-
+            html.Summary('Filters',style={'color':colors['purple'],'outline':'none'}),
             html.Div(style={'padding':"0px"}, children=[
-                html.Div(className='twelve columns', children=[
-                    html.Label('Manuacturers',style={'float':'left', 'margin-bottom':'2px'}),
-                    html.Button('All', id='select-all-btn', n_clicks=0, style={'float':'left','padding':'2px','margin-left':'5px', 'margin-top':'5px'}), #
-                    html.Button('None', id='select-none-btn', n_clicks=0, style={'float':'left','padding':'2px','margin-left':'5px', 'margin-top':'5px'}),
-                    dcc.Dropdown(
-                        className='twelve columns',
-                        id='mfr-dropdown',
-                        options=[{'label': mfr, 'value': mfr} for mfr in sorted(list(df['Manufacturer'].unique()))],
-                        multi=True,
-                        style={'border-radius':'4px'}, # 'background-color':colors['white'], 'color':colors['black'],
-                        value=sorted(list(df['Manufacturer'].unique()))
-                    ),
-                ]),
-                html.Div(className='twelve columns', children=[
+                html.Div(id='manufacturers-div',style={'padding-left':'20px','padding-right':'20px'},children=[
                     dcc.Checklist(
                         id='current-models-only-checkbox',
                         options=[
@@ -162,139 +156,236 @@ app.layout = html.Div(style={'padding':"10px"}, children=[
                         style={'margin-top': '5px', 'margin-bottom': '5px'},
                         value=[]
                     ),
+                    html.Label(style={'color':colors['purple'],'margin-bottom':'1px', 'margin-top':'3px'},children=['Manufacturers',
+                        html.Button('All', id='select-all-btn', style={'float':'left','padding':'2px','margin-left':'5px', 'margin-top':'3px','margin-bottom':'1px'}),
+                        html.Button('None', id='select-none-btn', style={'float':'left','padding':'2px','margin-left':'5px', 'margin-top':'3px','margin-bottom':'1px'}),
+                        dcc.Dropdown(
+                            # className='twelve columns',
+                            id='mfr-dropdown',
+                            options=[{'label': mfr, 'value': mfr} for mfr in sorted(list(df['Manufacturer'].unique()))],
+                            multi=True,
+                            style={'border-radius':'4px'}, # 'background-color':colors['white'], 'color':colors['black'],
+                            value=sorted(list(df['Manufacturer'].unique())),
+                        ),
+                    ]),
                 ]),
-                html.Div(id='six-slider-filter-div', className='twelve columns', children=[
+                html.Div(id='filter-sliders-div', className='twelve columns', children=[
+                    html.Div(className='four columns filter-slider-div', children=[
+                        html.Label('Head Size (in)'),
+                        dcc.Graph(
+                            id='hist-head-size',
+                            figure={
+                                'data': [
+                                    {
+                                        'x': df['Head Size (in)'],
+                                        'nbins': 70,
+                                        'name': 'Head Size',
+                                        'marker':{'color':colors['blue']},
+                                        'type': 'histogram'
+                                    },
+                                ],
+                                'layout': filter_histogram_layout
+                            },
+                            config={'displayModeBar':False},
+                        ),
+                        dcc.RangeSlider(
+                            id='head-size-slider',
+                            className='filter-slider',
+                            min=df['Head Size (in)'].min(),
+                            max=df['Head Size (in)'].max(),
+                            marks={i: '{}'.format(i) for i in range(rounduptonearest(df['Head Size (in)'].min(),10),
+                                                                    int(df['Head Size (in)'].max()),
+                                                                    10)},
+                            step=0.5,
+                            tooltip = { 'always_visible': False },
+                            value=[df['Head Size (in)'].min(), df['Head Size (in)'].max()]
+                        ),
+                    ]),
 
-                    html.Div(className='four columns', style={'padding-left':'15px', 'padding-right':'15px'},
-                        children=[
-                            html.Label(children=['Head Size (in)',
-                                dcc.RangeSlider(
-                                    id='head-size-slider',
-                                    className='filter-slider',
-                                    min=df['Head Size (in)'].min(),
-                                    max=df['Head Size (in)'].max(),
-                                    marks={i: '{}'.format(i) for i in range(rounduptonearest(df['Head Size (in)'].min(),10),
-                                                                            int(df['Head Size (in)'].max()),
-                                                                            10)},
-                                    step=0.5,
-                                    tooltip = { 'always_visible': False },
-                                    value=[df['Head Size (in)'].min(), df['Head Size (in)'].max()]
-                                ),
-                            ]),
+                    html.Div(className='four columns filter-slider-div', children=[
+                        html.Label('Strung Weight (oz)'),
+                        dcc.Graph(
+                            id='hist-strung-weight',
+                            figure={
+                                'data': [
+                                    {
+                                        'x': df['Strung Weight (oz)'],
+                                        'nbins': 26,
+                                        'name': 'Strung Weight',
+                                        'marker':{'color':colors['blue']},
+                                        'type': 'histogram'
+                                    },
+                                ],
+                                'layout': filter_histogram_layout
+                            },
+                            config={'displayModeBar':False},
+                        ),
+                        dcc.RangeSlider(
+                            id='strung-weight-slider',
+                            className='filter-slider',
+                            min=df['Strung Weight (oz)'].min(),
+                            max=df['Strung Weight (oz)'].max(),
+                            marks={i: '{}'.format(i) for i in range(int(df['Strung Weight (oz)'].min()), int(df['Strung Weight (oz)'].max())+1)},
+                            step=0.25,
+                            tooltip={'always_visible':False},
+                            value=[df['Strung Weight (oz)'].min(), df['Strung Weight (oz)'].max()]
+                        ),
+                    ]),
 
-                        ]
-                    ),
+                    html.Div(className='four columns filter-slider-div', children=[
+                        html.Label('Balance (pts HL/HH)'),
+                        dcc.Graph(
+                            id='hist-balance',
+                            figure={
+                                'data': [
+                                    {
+                                        'x': df['Balance (pts)'],
+                                        'nbins': 61,
+                                        'name': 'Balance',
+                                        'marker':{'color':colors['blue']},
+                                        'type': 'histogram'
+                                    },
+                                ],
+                                'layout': filter_histogram_layout
+                            },
+                            config={'displayModeBar':False},
+                        ),
+                        dcc.RangeSlider(
+                            id='balance-slider',
+                            className='filter-slider',
+                            min=df['Balance (pts)'].min(),
+                            max=df['Balance (pts)'].max(),
+                            marks={i: '{} HL'.format(i) if i <0  else '{} HH'.format(i) for i in range(int(df['Balance (pts)'].min()), int(df['Balance (pts)'].max())+1, 5)},
+                            step=1,
+                            tooltip = { 'always_visible': False },
+                            value=[df['Balance (pts)'].min(), df['Balance (pts)'].max()]
+                        )
+                    ]),
 
-                    html.Div(className='four columns', style={'padding-left':'15px', 'padding-right':'15px'},
-                        children=[
-                            html.Label(children=['Strung Weight (oz)',
-                                dcc.RangeSlider(
-                                    id='strung-weight-slider',
-                                    className='filter-slider',
-                                    min=df['Strung Weight (oz)'].min(),
-                                    max=df['Strung Weight (oz)'].max(),
-                                    marks={i: '{}'.format(i) for i in range(int(df['Strung Weight (oz)'].min()), int(df['Strung Weight (oz)'].max())+1)},
-                                    step=0.25,
-                                    tooltip = { 'always_visible': False },
-                                    value=[df['Strung Weight (oz)'].min(), df['Strung Weight (oz)'].max()]
-                                )
-                            ]),
-                        ]
-                    ),
+                    html.Div(className='four columns filter-slider-div', children=[
+                        html.Label('Beam Width (avg. mm)'),
+                        dcc.Graph(
+                            id='hist-beam-width',
+                            figure={
+                                'data': [
+                                    {
+                                        'x': df['Beam Width (avg. mm)'],
+                                        'nbins': 32,
+                                        'name': 'Beam Width',
+                                        'marker':{'color':colors['blue']},
+                                        'type': 'histogram'
+                                    },
+                                ],
+                                'layout': filter_histogram_layout
+                            },
+                            config={'displayModeBar':False},
+                        ),
+                        dcc.RangeSlider(
+                            id='beam-width-slider',
+                            className='filter-slider',
+                            min=df['Beam Width (avg. mm)'].min(),
+                            max=df['Beam Width (avg. mm)'].max(),
+                            marks={i: '{}'.format(i) for i in range(int(math.ceil(df['Beam Width (avg. mm)'].min())), int(df['Beam Width (avg. mm)'].max())+1, 3)},
+                            step=0.5,
+                            tooltip = { 'always_visible': False },
+                            value=[df['Beam Width (avg. mm)'].min(), df['Beam Width (avg. mm)'].max()]
+                        )
+                    ]),
 
-                    html.Div(className='four columns', style={'padding-left':'15px', 'padding-right':'15px'},
-                        children=[
-                            html.Label(children=['Balance (pts HL/HH)',
-                                dcc.RangeSlider(
-                                    id='balance-slider',
-                                    className='filter-slider',
-                                    min=df['Balance (pts)'].min(),
-                                    max=df['Balance (pts)'].max(),
-                                    marks={i: '{} HL'.format(i) if i <0  else '{} HH'.format(i) for i in range(int(df['Balance (pts)'].min()), int(df['Balance (pts)'].max())+1, 5)},
-                                    step=0.5,
-                                    tooltip = { 'always_visible': False },
-                                    value=[df['Balance (pts)'].min(), df['Balance (pts)'].max()]
-                                )
-                            ]),
-                        ]
-                    ),
+                    html.Div(className='four columns filter-slider-div', children=[
+                        html.Label('String Density (X/in.²)'),
+                        dcc.Graph(
+                            id='hist-string-density',
+                            figure={
+                                'data': [
+                                    {
+                                        'x': df['String Density (X/in2)'],
+                                        'nbins': 25,
+                                        'name': 'String Density',
+                                        'marker':{'color':colors['blue']},
+                                        'type': 'histogram'
+                                    },
+                                ],
+                                'layout': filter_histogram_layout
+                            },
+                            config={'displayModeBar':False},
+                        ),
+                        dcc.RangeSlider(
+                            id='string-density-slider',
+                            className='filter-slider',
+                            min=1.8,
+                            max=4.2,
+                            marks={2: '2', 3: '3', 4: '4'},
+                            step=0.1,
+                            tooltip = { 'always_visible': False },
+                            value=[1.8, 4.2]
+                        )
+                    ]),
 
-                    html.Div(className='four columns', style={'padding-left':'15px', 'padding-right':'15px'},
-                        children=[
-                            html.Label(children=['Beam Width (avg. mm)',
-                                dcc.RangeSlider(
-                                    id='beam-width-slider',
-                                    className='filter-slider',
-                                    min=df['Beam Width (avg. mm)'].min(),
-                                    max=df['Beam Width (avg. mm)'].max(),
-                                    marks={i: '{}'.format(i) for i in range(int(math.ceil(df['Beam Width (avg. mm)'].min())), int(df['Beam Width (avg. mm)'].max())+1, 3)},
-                                    step=0.5,
-                                    tooltip = { 'always_visible': False },
-                                    value=[df['Beam Width (avg. mm)'].min(), df['Beam Width (avg. mm)'].max()]
-                                )
-                            ]),
-                        ]
-                    ),
+                    html.Div(className='four columns filter-slider-div', children=[
+                        html.Label('Swingweight'),
+                        dcc.Graph(
+                            id='hist-swingweight',
+                            figure={
+                                'data': [
+                                    {
+                                        'x': df['Swingweight'],
+                                        'nbins': 220,
+                                        'name': 'Swingweight',
+                                        'marker':{'color':colors['blue']},
+                                        'type': 'histogram'
+                                    },
+                                ],
+                                'layout': filter_histogram_layout
+                            },
+                            config={'displayModeBar':False},
+                        ),
+                        dcc.RangeSlider(
+                            id='swingweight-slider',
+                            className='filter-slider',
+                            min=df['Swingweight'].min(),
+                            max=df['Swingweight'].max(),
+                            marks={i: '{}'.format(i) for i in range(rounduptonearest(df['Swingweight'].min(),50), int(df['Swingweight'].max())+1, 50)},
+                            step=1,
+                            tooltip={'always_visible':False},
+                            value=[df['Swingweight'].min(), df['Swingweight'].max()]
+                        ),
+                    ]),
 
-                    html.Div(className='four columns', style={'padding-left':'15px', 'padding-right':'15px'},
-                        children=[
-                            html.Label(children=['String Density (X/in.²)',
-                                dcc.RangeSlider(
-                                    id='string-density-slider',
-                                    className='filter-slider',
-                                    min=1.8,
-                                    max=4.2,
-                                    marks={2: '2', 3: '3', 4: '4'},
-                                    step=0.1,
-                                    tooltip = { 'always_visible': False },
-                                    value=[1.8, 4.2]
-                                )
-                            ]),
-
-                        ]
-                    ),
-
-                    html.Div(className='four columns', style={'padding-left':'15px', 'padding-right':'15px'},
-                        children=[
-                            html.Label(children=['Swingweight',
-                                dcc.RangeSlider(
-                                    id='swingweight-slider',
-                                    className='filter-slider',
-                                    min=df['Swingweight'].min(),
-                                    max=df['Swingweight'].max(),
-                                    marks={i: '{}'.format(i) for i in range(rounduptonearest(df['Swingweight'].min(),50), int(df['Swingweight'].max())+1, 50)},
-                                    step=1,
-                                    tooltip = { 'always_visible': False },
-                                    value=[df['Swingweight'].min(), df['Swingweight'].max()]
-                                )
-                            ]),
-                        ]
-                    ),
-
-                    html.Div(className='four columns', style={'padding-left':'15px', 'padding-right':'15px'},
-                        children=[
-                            html.Label(children=['Stiffness',
-                                dcc.RangeSlider(
-                                    id='stiffness-slider',
-                                    className='filter-slider',
-                                    min=df['Stiffness'].min(),
-                                    max=df['Stiffness'].max(),
-                                    marks={i: '{}'.format(i) for i in range(rounduptonearest(df['Stiffness'].min(),10), int(df['Stiffness'].max())+1, 10)},
-                                    step=1,
-                                    tooltip = { 'always_visible': False },
-                                    value=[df['Stiffness'].min(), df['Stiffness'].max()]
-                                )
-                            ]),
-                        ]
-                    ),
-
+                    html.Div(className='four columns filter-slider-div', children=[
+                        html.Label('Stiffness'),
+                        dcc.Graph(
+                            id='hist-stiffness',
+                            figure={
+                                'data': [
+                                    {
+                                        'x': df['Stiffness'],
+                                        'nbins': 62,
+                                        'name': 'Stiffness',
+                                        'marker':{'color':colors['blue']},
+                                        'type': 'histogram'
+                                    },
+                                ],
+                                'layout': filter_histogram_layout
+                            },
+                            config={'displayModeBar':False},
+                        ),
+                        dcc.RangeSlider(
+                            id='stiffness-slider',
+                            # className='filter-slider',
+                            min=df['Stiffness'].min(),
+                            max=df['Stiffness'].max(),
+                            marks={i: '{}'.format(i) for i in range(rounduptonearest(df['Stiffness'].min(),10), int(df['Stiffness'].max())+1, 10)},
+                            step=1,
+                            tooltip={'always_visible':False},
+                            value=[df['Stiffness'].min(), df['Stiffness'].max()]
+                        ),
+                    ]),
                 ]),
             ]),
         ]),
     ]),
-    html.Br(),
-    html.Br(),
-    html.Div(className='three columns', id='settings', style={'outline': '1px solid #794bc4','margin-top':'20px','padding':'10px', 'margin-right':'20px'}, children=[
+    html.Div(className='three columns inner-border', id='settings', children=[
         dcc.Tabs(id="tabs", value='tab-1', parent_className='custom-tabs', className='custom-tabs-container', children=[
             dcc.Tab(label='Choose Axes', value='tab-1', className='custom-tab',
                     selected_className='custom-tab--selected',
@@ -382,17 +473,16 @@ app.layout = html.Div(style={'padding':"10px"}, children=[
                    'Swingweight', 'String Density (X/in2)'],
             style={'color': 'white'}
         ),
-    ]),
-    html.Div(className='nine columns',
+    ]), #style={'padding':'10px','outline': '1px solid #794bc4','outline-offset':'-10px',}
+    html.Div(className='nine columns inner-border',
 			 id='graph-div',
-			 style={'outline': '1px solid #794bc4','margin-top':'20px'},
+			 # style={'outline': '1px solid #794bc4','outline-offset':'-10px','padding':'20px'},
 			 children=[
         dcc.Graph(
             id='racquetspace_graph',
         ),
     ]),
-    html.Div(style={'outline': '1px solid #794bc4','margin-top':'20px','padding':'10px'}, children=[
-        # dcc.Markdown('''**Click a racket in the graph above or search for one below to see details and most similar rackets.**'''),
+    html.Div(className='twelve columns',id='table-div',style={'outline': '1px solid #794bc4','margin-top':'20px','padding':'10px'}, children=[
         html.Label('Click a racket in the graph above or search for one below to see details and most similar rackets.', style={'margin-top':'10px'}),
         dcc.Dropdown(
             id='model-dropdown',
@@ -404,7 +494,6 @@ app.layout = html.Div(style={'padding':"10px"}, children=[
         dash_table.DataTable(
             id='selected-rackets-table',
             columns=[
-				# {'name': 'ID', 'id': 'ID'},
 				{'name': 'Distance', 'id': 'Distance', 'type': 'numeric', 'format': Format(
                     scheme=Scheme.fixed,
                     precision=3,)},
@@ -422,19 +511,6 @@ app.layout = html.Div(style={'padding':"10px"}, children=[
                     scheme=Scheme.fixed,
                     precision=3,)},
 				{'name': 'link', 'id': 'link', 'presentation':'markdown'},
-                # {"name": i, "id": i}
-                # for i in [#"ID", # TODO: hide this one
-                #           "Distance",
-                #           "Manufacturer",
-                #           "Model",
-                #           "Head Size (in)",
-                #           "Strung Weight (oz)",
-                #           "Balance (pts)",
-                #           "Stiffness",
-                #           "Beam Width (avg. mm)",
-                #           "Swingweight",
-                #           "String Density (X/in2)",
-                #           "url"]
             ],
 			style_header={
 				'backgroundColor': colors['black'],
@@ -452,25 +528,13 @@ app.layout = html.Div(style={'padding':"10px"}, children=[
 				} for c in ['Manufacturer', 'Model']
 			],
 		)
-
-		# 'format': Format(
-		#                 scheme=Scheme.fixed,
-		#                 precision=2,
-		#                 group=Group.yes,
-		#                 groups=3,
-		#                 group_delimiter='.',
-		#                 decimal_delimiter=',',
-		#                 symbol=Symbol.yes,
-		#                 symbol_prefix=u'€')
-		#         )
-    ], className='twelve columns'),
+    ]),
 
     html.Div([
         html.Pre(id='click-data'),
     ], className='nine columns'),
     html.Div(id='hidden-div', style={'display':'none'}),
 ])
-
 @app.callback(
     Output('mfr-dropdown', 'value'),
     [Input('select-all-btn', 'n_clicks'),
@@ -585,16 +649,22 @@ def update_scatter(mfrs, head_size_range, strung_weight_range,
                  labels={
                     x_col: x_col,
                     y_col: y_col,
-                    color: color.split(' (')[0]
+                    color: color.split(' (')[0] if '(' in color else color,
                     #color: color.replace(' (','\n\n\n\n(#')
                  },
-				 height=483,
+                 # title='Showing ' + str(len(filtered_df)) + ' Rackets',
+				 height=400,
+                 # go.layout(margin=dict(t=50)),
                  hover_data= ['ID'] + axes_checklist,
                  opacity=1.0,
                  color_continuous_scale=[colors['pink'], colors['blue']],
                  color_discrete_sequence=[colors['pink'], colors['blue']])#, 
                  # log_x=True, size_max=60) "Beam Width (avg. mm)"
 
+    fig.update_layout(
+        margin=dict(l=50, r=0, t=10, b=30),
+        # paper_bgcolor="LightSteelBlue",
+    )
     fig.update_traces(marker_size=5)
     fig.update_layout(plot_bgcolor=colors['gray'], paper_bgcolor=colors['black'], font_color=colors['white'])
 
