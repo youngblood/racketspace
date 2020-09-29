@@ -148,27 +148,26 @@ app.layout = html.Div(style={'margin':'0px','padding':"0px"},children=[
             html.Summary('Filters',style={'color':colors['purple'],'outline':'none'}),
             html.Div(style={'padding':"0px"}, children=[
                 html.Div(className='twelve columns',children=[
-                    html.Label(style={'float':'left','margin-bottom':'1px', 'padding-top':'3px','color':colors['black']},children=["V",
-                        html.P('Manufacturers',style={'float':'left','padding-top':'5px','color':colors['purple']}),
-                        html.Button('All', id='select-all-btn', n_clicks=0, style={'float':'left','padding':'2px','margin-left':'5px','margin-top':'3px','margin-bottom':'1px'}),
-                        html.Button('None', id='select-none-btn', n_clicks=0, style={'float':'left','padding':'2px','margin-left':'5px','margin-top':'3px','margin-bottom':'1px'}),
-                        dcc.Dropdown(
-                            # className='twelve columns',
-                            id='mfr-dropdown',
-                            options=[{'label': mfr, 'value': mfr} for mfr in sorted(list(df['Manufacturer'].unique()))],
-                            multi=True,
-                            style={'border-radius':'4px'}, # 'background-color':colors['white'], 'color':colors['black'],
-                            value=sorted(list(df['Manufacturer'].unique())),
-                        ),
-                        dcc.Checklist(
-                            id='current-models-only-checkbox',
-                            options=[
-                                {'label': 'Current Models Only', 'value': 'True'},
-                            ],
-                            style={'margin-top': '5px', 'margin-bottom': '5px'},
-                            value=[]
-                        ),
-                    ]),
+                    html.Label("Manufacturers"),#style={'float':'left','margin-bottom':'1px', 'padding-top':'3px',},children=["Manufacturers",
+                    #html.P('Manufacturers',style={'float':'left','padding-top':'5px','color':colors['purple']}),
+                    html.Button('All', id='select-all-btn', n_clicks=0, ),#style={'float':'left','padding':'2px','margin-left':'5px','margin-top':'3px','margin-bottom':'1px'}),
+                    html.Button('None', id='select-none-btn', n_clicks=0, ),#style={'float':'left','padding':'2px','margin-left':'5px','margin-top':'3px','margin-bottom':'1px'}),
+                    dcc.Dropdown(
+                        className='twelve columns',
+                        id='mfr-dropdown',
+                        options=[{'label': mfr, 'value': mfr} for mfr in sorted(list(df['Manufacturer'].unique()))],
+                        multi=True,
+                        style={'border-radius':'4px'}, # 'background-color':colors['white'], 'color':colors['black'],
+                        value=sorted(list(df['Manufacturer'].unique())),
+                    ),
+                    dcc.Checklist(
+                        id='current-models-only-checkbox',
+                        options=[
+                            {'label': 'Current Models Only', 'value': 'True'},
+                        ],
+                        style={'margin-top': '5px', 'margin-bottom': '5px'},
+                        value=[]
+                    ),
                 ]),
                 html.Div(id='filter-sliders-div', className='twelve columns', children=[
                     html.Div(className='four columns filter-slider-div', children=[
