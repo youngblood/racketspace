@@ -147,11 +147,18 @@ app.layout = html.Div(style={'margin':'0px','padding':"0px"},children=[
         html.Details(children=[
             html.Summary('Filters',style={'color':colors['purple'],'outline':'none'}),
             html.Div(style={'padding':"0px"}, children=[
+                dcc.Checklist(
+                    id='current-models-only-checkbox',
+                    options=[
+                        {'label': 'Current Models Only', 'value': 'True'},
+                    ],
+                    style={'margin-top': '5px', 'margin-bottom': '5px'},
+                    value=[]
+                ),
                 html.Div(className='twelve columns',children=[
-                    html.Label("Manufacturers"),#style={'float':'left','margin-bottom':'1px', 'padding-top':'3px',},children=["Manufacturers",
-                    #html.P('Manufacturers',style={'float':'left','padding-top':'5px','color':colors['purple']}),
-                    html.Button('All', id='select-all-btn', n_clicks=0, ),#style={'float':'left','padding':'2px','margin-left':'5px','margin-top':'3px','margin-bottom':'1px'}),
-                    html.Button('None', id='select-none-btn', n_clicks=0, ),#style={'float':'left','padding':'2px','margin-left':'5px','margin-top':'3px','margin-bottom':'1px'}),
+                    html.Label("Manufacturers",style={'float':'left'}),
+                    html.Button('All', id='select-all-btn', n_clicks=0, style={'outline':'none','float':'left','margin-left':'5px'}),
+                    html.Button('None', id='select-none-btn', n_clicks=0, style={'outline':'none','float':'left','margin-left':'5px'}),
                     dcc.Dropdown(
                         className='twelve columns',
                         id='mfr-dropdown',
@@ -159,14 +166,6 @@ app.layout = html.Div(style={'margin':'0px','padding':"0px"},children=[
                         multi=True,
                         style={'border-radius':'4px'}, # 'background-color':colors['white'], 'color':colors['black'],
                         value=sorted(list(df['Manufacturer'].unique())),
-                    ),
-                    dcc.Checklist(
-                        id='current-models-only-checkbox',
-                        options=[
-                            {'label': 'Current Models Only', 'value': 'True'},
-                        ],
-                        style={'margin-top': '5px', 'margin-bottom': '5px'},
-                        value=[]
                     ),
                 ]),
                 html.Div(id='filter-sliders-div', className='twelve columns', children=[
@@ -652,7 +651,7 @@ def update_scatter(mfrs, head_size_range, strung_weight_range,
                     color: color.split(' (')[0] if '(' in color else color,
                     #color: color.replace(' (','\n\n\n\n(#')
                  },
-                 # title='Showing ' + str(len(filtered_df)) + ' Rackets',
+                 title='Showing ' + str(len(filtered_df)) + ' Rackets',
 				 height=463,
                  # go.layout(margin=dict(t=50)),
                  hover_data= ['ID'] + axes_checklist,
@@ -662,7 +661,7 @@ def update_scatter(mfrs, head_size_range, strung_weight_range,
                  # log_x=True, size_max=60) "Beam Width (avg. mm)"
 
     fig.update_layout(
-        margin=dict(l=50, r=0, t=10, b=30),
+        margin=dict(l=50, r=0, t=30, b=30), # t=10
         # paper_bgcolor="LightSteelBlue",
     )
     fig.update_traces(marker_size=5)
