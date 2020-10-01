@@ -10,7 +10,7 @@
 
 .custom-tab {
     color: gray;
-    background-color: #3d3d3d !important;
+    background-color: #222222 !important; /*#3d3d3d*/
     border-top-left-radius: 3px;
     border-top-right-radius: 3px;
     border-top: 3px solid transparent !important;
@@ -25,9 +25,10 @@
 /*    padding-top: 10px;
     padding-bottom: 10px;*/
 }
+
 .custom-tab--selected {
-    color: #794bc4 !important;
-    background-color: #3d3d3d !important;
+    color: #00d0ff !important;
+    background-color: #222222 !important;
     border-left: 1px solid #794bc4 !important;
     border-right: 1px solid #794bc4 !important;
     border-bottom: 1px solid #794bc4 !important;
@@ -37,7 +38,7 @@
 .custom-tab:hover {
     color: lightgrey;
 }
-
+/*
 .custom-dropdown {
     color: blue !important
     background-color: green !important
@@ -47,8 +48,7 @@
     color: red !important
     background-color: yellow !important
 }
-
+*/
 .filter-slider {
     margin-bottom: 0px !important;
 }
-

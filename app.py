@@ -92,8 +92,8 @@ for i in [1,2]:
 colors = {
     'black': 'black',
     'white': '#d9d9d9',
-    'purple': '#794bc4', #B300FF;
-    'gray': '#3d3d3d',
+    'purple': '#794bc4', #CC8899 #B300FF;
+    'gray': '#222222', #'#3d3d3d',
     'pink': '#ff00fb',
     'blue': '#00d0ff',
     'riviera_blue': '#00a2ff'
@@ -133,8 +133,8 @@ filter_histogram_layout = {'xaxis':{'showticklabels':False},
 
 
 app.layout = html.Div(style={'margin':'0px','padding':"0px"},children=[
-    html.Div(className='twelve columns', style={'padding-left':'10px'}, children=[
-        html.H1(children=[
+    html.Div(style={'padding-left':'10px','min-width':'200px'}, children=[ # className='twelve columns',
+        html.H1(className='gradient-text', children=[
             html.Img(src=app.get_asset_url('logo.png'), height=32),
             'RACKETSPACE',
         ])],
@@ -164,7 +164,7 @@ app.layout = html.Div(style={'margin':'0px','padding':"0px"},children=[
                         id='mfr-dropdown',
                         options=[{'label': mfr, 'value': mfr} for mfr in sorted(list(df['Manufacturer'].unique()))],
                         multi=True,
-                        style={'border-radius':'4px'}, # 'background-color':colors['white'], 'color':colors['black'],
+                        style={'border-radius':'4px', 'background-color':colors['gray'], 'color':colors['black'],},
                         value=sorted(list(df['Manufacturer'].unique())),
                     ),
                 ]),
@@ -393,7 +393,7 @@ app.layout = html.Div(style={'margin':'0px','padding':"0px"},children=[
                 dcc.Dropdown(
                     id='x-axis-dropdown',
                     className='custom-dropdown',
-                    style={'background-color':colors['white'], 'color':colors['black'], 'border-radius':'4px'},
+                    style={'border-radius':'4px', 'background-color': colors['gray'], 'color':colors['black']},
                     options=[{'label': 'Head Size (in)', 'value': 'Head Size (in)'},
                              {'label': 'Strung Weight (oz)', 'value': 'Strung Weight (oz)'},
                              {'label': 'Beam Width (avg. mm)', 'value': 'Beam Width (avg. mm)'},
@@ -408,7 +408,7 @@ app.layout = html.Div(style={'margin':'0px','padding':"0px"},children=[
                 dcc.Dropdown(
                     id='y-axis-dropdown',
                     className='custom-dropdown',
-                    style={'border-radius':'4px', 'background-color':colors['white'], 'color':colors['purple'],}, #
+                    style={'border-radius':'4px', 'background-color': colors['gray'], 'color':colors['black']}, #
                     options=[{'label': 'Head Size (in)', 'value': 'Head Size (in)'},
                              {'label': 'Strung Weight (oz)', 'value': 'Strung Weight (oz)'},
                              {'label': 'Beam Width (avg. mm)', 'value': 'Beam Width (avg. mm)'},
@@ -432,7 +432,7 @@ app.layout = html.Div(style={'margin':'0px','padding':"0px"},children=[
                 dcc.Dropdown(
                     id='dim-red-algo-dropdown',
                     className='custom-dropdown',
-                    style={'background-color':colors['white'], 'color':colors['black'], 'border-radius':'4px'},
+                    style={'background-color':colors['gray'], 'color':colors['purple'], 'border-radius':'4px'},
                     options=[{'label': 'PCA', 'value': 'PCA'},
                              {'label': 't-SNE', 'value': 't-SNE'}],
                     value='PCA'
@@ -443,7 +443,7 @@ app.layout = html.Div(style={'margin':'0px','padding':"0px"},children=[
         html.Label('Color', style={'margin-top':'10px'}),
         dcc.Dropdown(
             id='color-dropdown',
-            style={'background-color':colors['white'], 'color':colors['black'], 'border-radius':'4px'},
+            style={'background-color':colors['gray'], 'color':colors['black'], 'border-radius':'4px'},
             className='custom-dropdown',
             options=[{'label': 'Head Size (in)', 'value': 'Head Size (in)'},
                      {'label': 'Strung Weight (oz)', 'value': 'Strung Weight (oz)'},
@@ -482,12 +482,13 @@ app.layout = html.Div(style={'margin':'0px','padding':"0px"},children=[
         ),
     ]),
     html.Div(className='twelve columns inner-border',id='table-div', children=[
-        html.Label('Click a racket in the graph above or search for one below to see details and most similar rackets.', style={'margin-top':'10px'}),
+        html.Label('Click a racket in the graph above or search for one below to see details and most similar rackets.',
+                   style={'margin-top':'5px','margin-bottom':'10px'}),
         dcc.Dropdown(
             id='model-dropdown',
             options=[{'label': model, 'value': model} for model in sorted(list(df['Model'].unique()))],
             multi=False,
-            style={'background-color':colors['white'], 'color':colors['black'], 'border-radius':'4px'},
+            style={'background-color':colors['gray'], 'color':colors['black'], 'border-radius':'4px', 'margin-bottom':'10px'},
             value=None
         ),
         dash_table.DataTable(
@@ -661,9 +662,12 @@ def update_scatter(mfrs, head_size_range, strung_weight_range,
                  # log_x=True, size_max=60) "Beam Width (avg. mm)"
 
     fig.update_layout(
-        margin=dict(l=50, r=0, t=30, b=30), # t=10
+        margin=dict(l=50, r=0, t=35, b=30), # t=10
+        title_font_color=colors['purple'],
         # paper_bgcolor="LightSteelBlue",
     )
+    fig.update_xaxes(color=colors['purple'])
+    fig.update_yaxes(color=colors['purple'])
     fig.update_traces(marker_size=5)
     fig.update_layout(plot_bgcolor=colors['gray'], paper_bgcolor=colors['black'], font_color=colors['white'])
 
