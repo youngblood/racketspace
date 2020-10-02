@@ -5,11 +5,11 @@
     /* background-color: orange; */
     /*padding: 0px 24px;*/
     padding-bottom: 5px;
-    border-bottom: 1px solid #d6d6d6;
+    border-bottom: 1px solid gray; /*#d6d6d6;*/
 }
 
 .custom-tab {
-    color: gray;
+    color: #999999;
     background-color: #222222 !important; /*#3d3d3d*/
     border-top-left-radius: 3px;
     border-top-right-radius: 3px;

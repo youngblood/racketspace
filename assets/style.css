@@ -203,7 +203,7 @@ input[type="button"] {
   display: inline-block;
 /*  height: 38px;
   padding: 0 30px;*/
-  color: gray;
+  color: #999999; /*gray;*/
   border-color: gray
   text-align: center;
   font-size: 11px;
@@ -213,7 +213,7 @@ input[type="button"] {
   text-transform: uppercase;
   text-decoration: none;
   white-space: nowrap;
-  background-color: #3d3d3d;
+  background-color: #333333;
   border-radius: 4px;
   border: 1px solid #bbb;
   cursor: pointer;
@@ -479,8 +479,8 @@ there.
   /*display:inline-block;*/
     /*blue/pink/red*/
 
-    background: -webkit-linear-gradient(135deg,#00d0ff,#ff00fb,red);
-    background: linear-gradient(135deg,#00d0ff,#ff00fb,red);
+    background: -webkit-linear-gradient(90deg,#00d0ff,#ff00fb,#ff00fb,#ff00fb);
+    background: linear-gradient(90deg,#00d0ff,#ff00fb,#ff00fb,#ff00fb);
 
     /*blue/purple/pink/*/
     /*
@@ -489,6 +489,10 @@ there.
     */
     -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+}
+
+.Select {
+    border: none;
 }
 
 .Select.has-value.Select--single > .Select-control .Select-value .Select-value-label, .Select.has-value.is-pseudo-focused.Select--single > .Select-control .Select-value .Select-value-label {

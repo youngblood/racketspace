@@ -75,18 +75,29 @@ features_to_norm = ['Head Size (in)',
                     'String Density (X/in2)',
                     'Swingweight',]
 
+scaler = RobustScaler()
+
 for feature in features_to_norm:
-    df[feature + ' normed'] = 0
+    df[feature + ' normed'] = scaler.fit_transform(df[feature].values.reshape(-1, 1))
+
+normed_features = [feature + ' normed' for feature in features_to_norm]
+
+pca = PCA(n_components=3)
+pca.fit(df[normed_features])
+X_pca = pca.transform(df[normed_features])
 
 # Creating & initializing columns to hold PC values
 
-for i in [1,2,3]:
-    df['Principal Component '+str(i)] = 0
+for i in range(3):
+    df['Principal Component ' + str(i + 1)] = X_pca[:, i]
 
 # Creating & initializing columns to hold t-SNE values
 tsne = TSNE(random_state=42)
-for i in [1,2]:
-    df['t-SNE '+str(i)] = 0
+rackets_tsne = tsne.fit_transform(df[normed_features])
+
+df['t-SNE 1'] = rackets_tsne[:, 0]
+df['t-SNE 2'] = rackets_tsne[:, 1]
+
 
 # Defining a color palette
 colors = {
@@ -145,7 +156,7 @@ app.layout = html.Div(style={'margin':'0px','padding':"0px"},children=[
              # style={'outline': '1px solid #794bc4','outline-offset':'-10px','padding-top':'13px','padding-bottom':'13px'},
              children=[
         html.Details(children=[
-            html.Summary('Filters',style={'color':colors['purple'],'outline':'none'}),
+            html.Summary('Filter by Specifications',style={'color':colors['purple'],'outline':'none'}),
             html.Div(style={'padding':"0px"}, children=[
                 dcc.Checklist(
                     id='current-models-only-checkbox',
@@ -157,14 +168,14 @@ app.layout = html.Div(style={'margin':'0px','padding':"0px"},children=[
                 ),
                 html.Div(className='twelve columns',children=[
                     html.Label("Manufacturers",style={'float':'left'}),
-                    html.Button('All', id='select-all-btn', n_clicks=0, style={'outline':'none','float':'left','margin-left':'5px'}),
-                    html.Button('None', id='select-none-btn', n_clicks=0, style={'outline':'none','float':'left','margin-left':'5px'}),
+                    html.Button('All', id='select-all-btn', n_clicks=0, style={'outline':'none','float':'left','margin-left':'5px','border':'none'}),
+                    html.Button('None', id='select-none-btn', n_clicks=0, style={'outline':'none','float':'left','margin-left':'5px','border':'none'}),
                     dcc.Dropdown(
                         className='twelve columns',
                         id='mfr-dropdown',
                         options=[{'label': mfr, 'value': mfr} for mfr in sorted(list(df['Manufacturer'].unique()))],
                         multi=True,
-                        style={'border-radius':'4px', 'background-color':colors['gray'], 'color':colors['black'],},
+                        style={'border-radius':'4px', 'background-color':colors['gray'], 'color':colors['black'], 'border':'none'},
                         value=sorted(list(df['Manufacturer'].unique())),
                     ),
                 ]),
@@ -393,7 +404,7 @@ app.layout = html.Div(style={'margin':'0px','padding':"0px"},children=[
                 dcc.Dropdown(
                     id='x-axis-dropdown',
                     className='custom-dropdown',
-                    style={'border-radius':'4px', 'background-color': colors['gray'], 'color':colors['black']},
+                    style={'border-radius':'4px', 'background-color': colors['gray'], 'color':colors['black'], 'border': 'none'},
                     options=[{'label': 'Head Size (in)', 'value': 'Head Size (in)'},
                              {'label': 'Strung Weight (oz)', 'value': 'Strung Weight (oz)'},
                              {'label': 'Beam Width (avg. mm)', 'value': 'Beam Width (avg. mm)'},
@@ -408,7 +419,7 @@ app.layout = html.Div(style={'margin':'0px','padding':"0px"},children=[
                 dcc.Dropdown(
                     id='y-axis-dropdown',
                     className='custom-dropdown',
-                    style={'border-radius':'4px', 'background-color': colors['gray'], 'color':colors['black']}, #
+                    style={'border-radius':'4px', 'background-color': colors['gray'], 'color':colors['black'], 'border': 'none'}, #
                     options=[{'label': 'Head Size (in)', 'value': 'Head Size (in)'},
                              {'label': 'Strung Weight (oz)', 'value': 'Strung Weight (oz)'},
                              {'label': 'Beam Width (avg. mm)', 'value': 'Beam Width (avg. mm)'},
@@ -432,7 +443,7 @@ app.layout = html.Div(style={'margin':'0px','padding':"0px"},children=[
                 dcc.Dropdown(
                     id='dim-red-algo-dropdown',
                     className='custom-dropdown',
-                    style={'background-color':colors['gray'], 'color':colors['purple'], 'border-radius':'4px'},
+                    style={'background-color':colors['gray'], 'color':colors['black'], 'border-radius':'4px', 'border': 'none', 'margin-bottom':'10px'},
                     options=[{'label': 'PCA', 'value': 'PCA'},
                              {'label': 't-SNE', 'value': 't-SNE'}],
                     value='PCA'
@@ -443,7 +454,7 @@ app.layout = html.Div(style={'margin':'0px','padding':"0px"},children=[
         html.Label('Color', style={'margin-top':'10px'}),
         dcc.Dropdown(
             id='color-dropdown',
-            style={'background-color':colors['gray'], 'color':colors['black'], 'border-radius':'4px'},
+            style={'background-color':colors['gray'], 'color':colors['black'], 'border-radius':'4px', 'border': 'none'},
             className='custom-dropdown',
             options=[{'label': 'Head Size (in)', 'value': 'Head Size (in)'},
                      {'label': 'Strung Weight (oz)', 'value': 'Strung Weight (oz)'},
@@ -456,22 +467,8 @@ app.layout = html.Div(style={'margin':'0px','padding':"0px"},children=[
                      {'label': 'Principal Component 3', 'value': 'Principal Component 3'}],
             value='Balance (pts)'
         ),
-        html.Label('Axes to Use for Similarity (Below) and Combined Axes Plots', style={'margin-top':'10px'}),
-        dcc.Checklist(
-            id='axes-checklist',
-            options=[
-                {'label': 'Head Size (in)', 'value': 'Head Size (in)'},
-                {'label': 'Strung Weight (oz)', 'value': 'Strung Weight (oz)'},
-                {'label': 'Balance (pts)', 'value': 'Balance (pts)'},
-                {'label': 'Stiffness', 'value': 'Stiffness'},
-                {'label': 'Beam Width (avg. mm)', 'value': 'Beam Width (avg. mm)'},
-                {'label': 'Swingweight', 'value': 'Swingweight'},
-                {'label': 'String Density (intersections / sq. in.)', 'value': 'String Density (X/in2)'},
-            ],
-            value=['Head Size (in)', 'Strung Weight (oz)', 'Balance (pts)', 'Stiffness', 'Beam Width (avg. mm)',
-                   'Swingweight', 'String Density (X/in2)'],
-            style={'color': 'white'}
-        ),
+        # html.Label('Axes to Use for Similarity (Below) and Combined Axes Plots', style={'margin-top':'10px'}),
+
     ]), #style={'padding':'10px','outline': '1px solid #794bc4','outline-offset':'-10px',}
     html.Div(className='nine columns inner-border',
 			 id='graph-div',
@@ -482,15 +479,35 @@ app.layout = html.Div(style={'margin':'0px','padding':"0px"},children=[
         ),
     ]),
     html.Div(className='twelve columns inner-border',id='table-div', children=[
-        html.Label('Click a racket in the graph above or search for one below to see details and most similar rackets.',
+        html.Label('Search or click a racket in the chart to see details and similar rackets.',
                    style={'margin-top':'5px','margin-bottom':'10px'}),
         dcc.Dropdown(
             id='model-dropdown',
             options=[{'label': model, 'value': model} for model in sorted(list(df['Model'].unique()))],
             multi=False,
-            style={'background-color':colors['gray'], 'color':colors['black'], 'border-radius':'4px', 'margin-bottom':'10px'},
+            style={'background-color':colors['gray'], 'color':colors['black'], 'border-radius':'4px', 'border':'none', 'margin-bottom':'10px'},
             value=None
         ),
+    html.Details(children=[
+            html.Summary('Axes to Consider for Similarity',style={'color':colors['purple'],'outline':'none','margin-bottom':'10px'}),
+            html.Div(style={'margin-bottom':"10px"}, children=[
+                dcc.Checklist(
+                    id='axes-checklist',
+                    options=[
+                        {'label': 'Head Size (in)', 'value': 'Head Size (in)'},
+                        {'label': 'Strung Weight (oz)', 'value': 'Strung Weight (oz)'},
+                        {'label': 'Balance (pts)', 'value': 'Balance (pts)'},
+                        {'label': 'Stiffness', 'value': 'Stiffness'},
+                        {'label': 'Beam Width (avg. mm)', 'value': 'Beam Width (avg. mm)'},
+                        {'label': 'Swingweight', 'value': 'Swingweight'},
+                        {'label': 'String Density (intersections / sq. in.)', 'value': 'String Density (X/in2)'},
+                    ],
+                    value=['Head Size (in)', 'Strung Weight (oz)', 'Balance (pts)', 'Stiffness', 'Beam Width (avg. mm)',
+                           'Swingweight', 'String Density (X/in2)'],
+                    style={'color': 'white'}
+                ),
+            ]),
+        ]),
         dash_table.DataTable(
             id='selected-rackets-table',
             columns=[
@@ -519,7 +536,8 @@ app.layout = html.Div(style={'margin':'0px','padding':"0px"},children=[
 			},
 			style_cell={
 				'backgroundColor': colors['gray'],
-				'color': colors['white'],
+				'color': '#BBBBBB',
+                'border': '1px solid #444444'
 			},
 			style_cell_conditional=[
 				{
@@ -545,40 +563,40 @@ def select_all_none_mfrs(select_all, select_none):
         return sorted(list(df['Manufacturer'].unique()))
     else:
         return []
-
-@app.callback(
-    Output('hidden-div', 'children'),
-    [Input('axes-checklist', 'value')])
-def update_reduced_dimensions(axes_checklist):
-    # types_of_norming = {}  # min-max-scaler,
-    # Update PCA columns
-    if len(axes_checklist) < 3:
-        df['Principal Component 3'] = 0
-    if len(axes_checklist) < 2:
-        df['Principal Component 2'] = 0
-    if len(axes_checklist) < 1:
-        df['Principal Component 1'] = 0
-    else:
-        scaler = RobustScaler()
-
-        for feature in axes_checklist:
-            df[feature + ' normed'] = scaler.fit_transform(df[feature].values.reshape(-1, 1))
-
-        normed_features = [feature + ' normed' for feature in axes_checklist]
-
-        pca = PCA(n_components=min(3,len(axes_checklist)))
-        pca.fit(df[normed_features])
-        X_pca = pca.transform(df[normed_features])
-
-        for i in range(X_pca.shape[1]):
-            df['Principal Component ' + str(i + 1)] = X_pca[:, i]
-
-    # Update t-SNE columns
-    rackets_tsne = tsne.fit_transform(df[axes_checklist])
-    df['t-SNE 1'] = rackets_tsne[:, 0]
-    df['t-SNE 2'] = rackets_tsne[:, 1]
-
-    return None
+#
+# @app.callback(
+#     Output('hidden-div', 'children'),
+#     [Input('axes-checklist', 'value')])
+# def update_reduced_dimensions(axes_checklist):
+#     # types_of_norming = {}  # min-max-scaler,
+#     # Update PCA columns
+#     if len(axes_checklist) < 3:
+#         df['Principal Component 3'] = 0
+#     if len(axes_checklist) < 2:
+#         df['Principal Component 2'] = 0
+#     if len(axes_checklist) < 1:
+#         df['Principal Component 1'] = 0
+#     else:
+#         scaler = RobustScaler()
+#
+#         for feature in axes_checklist:
+#             df[feature + ' normed'] = scaler.fit_transform(df[feature].values.reshape(-1, 1))
+#
+#         normed_features = [feature + ' normed' for feature in axes_checklist]
+#
+#         pca = PCA(n_components=min(3,len(axes_checklist)))
+#         pca.fit(df[normed_features])
+#         X_pca = pca.transform(df[normed_features])
+#
+#         for i in range(X_pca.shape[1]):
+#             df['Principal Component ' + str(i + 1)] = X_pca[:, i]
+#
+#     # Update t-SNE columns
+#     rackets_tsne = tsne.fit_transform(df[axes_checklist])
+#     df['t-SNE 1'] = rackets_tsne[:, 0]
+#     df['t-SNE 2'] = rackets_tsne[:, 1]
+#
+#     return None
 
 @app.callback(
     Output('racquetspace_graph', 'figure'),
@@ -650,27 +668,57 @@ def update_scatter(mfrs, head_size_range, strung_weight_range,
                     x_col: x_col,
                     y_col: y_col,
                     color: color.split(' (')[0] if '(' in color else color,
-                    #color: color.replace(' (','\n\n\n\n(#')
                  },
-                 title='Showing ' + str(len(filtered_df)) + ' Rackets',
-				 height=463,
-                 # go.layout(margin=dict(t=50)),
+                 title='(Showing: ' + str(len(filtered_df)) + ')',
+				 height=400,
                  hover_data= ['ID'] + axes_checklist,
                  opacity=1.0,
                  color_continuous_scale=[colors['pink'], colors['blue']],
-                 color_discrete_sequence=[colors['pink'], colors['blue']])#, 
-                 # log_x=True, size_max=60) "Beam Width (avg. mm)"
+                 color_discrete_sequence=[colors['pink'], colors['blue']])
 
     fig.update_layout(
-        margin=dict(l=50, r=0, t=35, b=30), # t=10
+        margin=dict(l=50, r=0, t=0, b=30), # t=10
         title_font_color=colors['purple'],
-        # paper_bgcolor="LightSteelBlue",
     )
-    fig.update_xaxes(color=colors['purple'])
-    fig.update_yaxes(color=colors['purple'])
+    fig.update_xaxes(color=colors['purple'],
+                     showgrid=True, gridwidth=1, gridcolor='#333333',
+                     zeroline=True, zerolinewidth=2, zerolinecolor='#444444',
+                     tickfont=dict(color='gray')),
+    fig.update_yaxes(color=colors['purple'],
+                     showgrid=True, gridwidth=1, gridcolor='#333333',
+                     zeroline=True, zerolinewidth=2, zerolinecolor='#444444',
+                     tickfont=dict(color='gray')),
     fig.update_traces(marker_size=5)
-    fig.update_layout(plot_bgcolor=colors['gray'], paper_bgcolor=colors['black'], font_color=colors['white'])
+    fig.update_layout(plot_bgcolor=colors['gray'],
+                      paper_bgcolor=colors['black'])
+    fig.update_layout(coloraxis_colorbar=dict(
+        tickfont=dict(color='gray'),
+        title_font_color=colors['purple'],
+        title_font_size=14
+    ))
 
+    fig.update_layout(
+                      font_color='gray',
+                      legend_title_font_color='green',
+                      title_font_size=14,
+                      legend=dict(
+                          title=dict(
+                              font=dict(color=colors['purple'],
+                                        size=14)
+                          ),
+                          font=dict(
+                              color="gray"
+                          )
+                      )
+    )
+    fig.update_layout(
+        title={
+            # 'text': "Plot Title",
+            'font':{'size':12,'color':'gray'},
+            'y': 0.97,
+            'x': .5,
+            'xanchor': 'center',
+            'yanchor': 'top'})
     fig.update_layout(transition_duration=1000)
 
     return fig
