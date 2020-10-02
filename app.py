@@ -44,6 +44,7 @@ df.rename(columns={'url': 'tw_url', 'img_url': 'tw_img_url'},
                    # 'Unnamed: 0': 'ID', 'mfr': 'Manufacturer'},
           inplace=True)
 
+
 df['ID'] = df.index
 df['Distance'] = 0
 
