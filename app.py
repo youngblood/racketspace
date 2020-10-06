@@ -22,31 +22,33 @@ server = app.server
 app.title = "RacketSpace"
 
 # df = pd.read_csv('https://gist.githubusercontent.com/chriddyp/5d1ea79569ed194d432e56108a04d188/raw/a9f9e8076b837d541398e999dcbac2b2826a81f8/gdp-life-exp-2007.csv')	
-raw_df = pd.read_csv('data/racket_specs.csv')
+# raw_df = pd.read_csv('data/racket_specs.csv')
+df = pd.read_csv('data/racket_specs.csv')
+df['Model'] = df['Model'].astype(str)
 
 # initial data source filtering (NaNs & erroneous values)
-df = raw_df[(raw_df['Head Size (in)']>=60) & \
-            (raw_df['Head Size (in)']<=140) & \
-            (raw_df['Strung Weight (oz)']>=5) & \
-            (raw_df['Strung Weight (oz)']<=20) & \
-            (raw_df['Beam Width (avg. mm)']>=5) & \
-            (raw_df['Beam Width (avg. mm)']<=50) & \
-            (raw_df['Balance (pts)'] >= -20) & \
-            (raw_df['Balance (pts)'] <= 20) & \
-            (raw_df['String Density (X/in2)'] >= 1) & \
-            (raw_df['String Density (X/in2)'] <= 6) & \
-            (raw_df['Swingweight'] >= 100) & \
-            (raw_df['Swingweight'] <= 600) & \
-            (raw_df['Stiffness'] >= 10) & \
-            (raw_df['Stiffness'] <= 100)].copy()
-
-df.rename(columns={'url': 'tw_url', 'img_url': 'tw_img_url'},
-                   # 'Unnamed: 0': 'ID', 'mfr': 'Manufacturer'},
-          inplace=True)
-
-
-df['ID'] = df.index
-df['Distance'] = 0
+# df = raw_df[(raw_df['Head Size (in)']>=60) & \
+#             (raw_df['Head Size (in)']<=140) & \
+#             (raw_df['Strung Weight (oz)']>=5) & \
+#             (raw_df['Strung Weight (oz)']<=20) & \
+#             (raw_df['Beam Width (avg. mm)']>=5) & \
+#             (raw_df['Beam Width (avg. mm)']<=50) & \
+#             (raw_df['Balance (pts)'] >= -20) & \
+#             (raw_df['Balance (pts)'] <= 20) & \
+#             (raw_df['String Density (X/in2)'] >= 1) & \
+#             (raw_df['String Density (X/in2)'] <= 6) & \
+#             (raw_df['Swingweight'] >= 100) & \
+#             (raw_df['Swingweight'] <= 600) & \
+#             (raw_df['Stiffness'] >= 10) & \
+#             (raw_df['Stiffness'] <= 100)].copy()
+#
+# df.rename(columns={'url': 'tw_url', 'img_url': 'tw_img_url'},
+#                    # 'Unnamed: 0': 'ID', 'mfr': 'Manufacturer'},
+#           inplace=True)
+#
+#
+# df['ID'] = df.index
+# df['Distance'] = 0
 
 head_size_jitter 	  = 0.5
 strung_weight_jitter  = 0.05
@@ -116,25 +118,25 @@ def rounduptonearest(x, base=5):
     return base * math.ceil(int(x)/base)
 
 # FILL IN URL WHERE BLANK
-def replace_blank_urls_with_ebay(inputs):
-    return inputs[0] if type(inputs[0]) == str and inputs[0] != '' else \
-        'https://www.ebay.com/sch/i.html?_nkw={}'.format(inputs[1].replace(' ','+'))
-
-df['url'] = df[['tw_url','Model']].apply(replace_blank_urls_with_ebay, axis=1)
-
-
-
-
-df['Current/Old Models'] = df['tw_url'].apply(lambda x: \
-    'Current Model' if type(x) == str and x != '' else 'Old Model')
-
-def generate_buy_link(inputs):
-    text = "TW" if inputs[0] == 'Current Model' else 'eBay'
-    link = '['+text+'](' + inputs[1] + ')'
-    return link
-
-# new column for 'link'
-df['link'] = df[['Current/Old Models','url']].apply(generate_buy_link, axis=1)
+# def replace_blank_urls_with_ebay(inputs):
+#     return inputs[0] if type(inputs[0]) == str and inputs[0] != '' else \
+#         'https://www.ebay.com/sch/i.html?_nkw={}'.format(inputs[1].replace(' ','+'))
+#
+# df['url'] = df[['tw_url','Model']].apply(replace_blank_urls_with_ebay, axis=1)
+#
+#
+#
+#
+# df['Current/Old Models'] = df['tw_url'].apply(lambda x: \
+#     'Current Model' if type(x) == str and x != '' else 'Old Model')
+#
+# def generate_buy_link(inputs):
+#     text = "TW" if inputs[0] == 'Current Model' else 'eBay'
+#     link = '['+text+'](' + inputs[1] + ')'
+#     return link
+#
+# # new column for 'link'
+# df['link'] = df[['Current/Old Models','url']].apply(generate_buy_link, axis=1)
 
 filter_histogram_layout = {'xaxis':{'showticklabels':False},
                            'yaxis':{'showticklabels':False},
@@ -434,7 +436,7 @@ app.layout = html.Div(style={'margin':'0px','padding':"0px"},children=[
                 dcc.Checklist(
                         id='jitter-checkbox',
                         options=[{'label': 'Jitter', 'value': 'True'}],
-                        value=['True'],
+                        value=[],
                         style={'margin-top':'10px'}
                 ),
             ]),
@@ -483,8 +485,8 @@ app.layout = html.Div(style={'margin':'0px','padding':"0px"},children=[
         html.Label('Search or click a racket in the chart to see details and similar rackets.',
                    style={'margin-top':'5px','margin-bottom':'10px'}),
         dcc.Dropdown(
-            id='model-dropdown',
-            options=[{'label': model, 'value': model} for model in sorted(list(df['Model'].unique()))],
+            id='name-dropdown',
+            options=[{'label': model, 'value': model} for model in sorted(list(df['Name'].unique()))],
             multi=False,
             style={'background-color':colors['gray'], 'color':colors['black'], 'border-radius':'4px', 'border':'none', 'margin-bottom':'10px'},
             value=None
@@ -717,7 +719,7 @@ def update_scatter(mfrs, head_size_range, strung_weight_range,
             # 'text': "Plot Title",
             'font':{'size':12,'color':'gray'},
             'y': 0.97,
-            'x': .5,
+            'x': .48,
             'xanchor': 'center',
             'yanchor': 'top'})
     fig.update_layout(transition_duration=1000)
@@ -725,7 +727,7 @@ def update_scatter(mfrs, head_size_range, strung_weight_range,
     return fig
 
 @app.callback(
-    Output('model-dropdown', 'value'),
+    Output('name-dropdown', 'value'),
     [Input('racquetspace_graph', 'clickData')])
 def click_overwrite_search(clickData):
     try:
@@ -738,11 +740,11 @@ def calculate_distance(inputs, targets):
 
 @app.callback(
     Output('selected-rackets-table', 'data'),
-    [Input('model-dropdown', 'value'),
+    [Input('name-dropdown', 'value'),
      Input('axes-checklist', 'value')])
-def select_racket_table(model_dropdown, axes_checklist):
-    if model_dropdown:
-        id = int(df[df['Model'] == model_dropdown]['ID'].values[0])
+def select_racket_table(name_dropdown, axes_checklist):
+    if name_dropdown:
+        id = int(df[df['Name'] == name_dropdown]['ID'].values[0])
         targets = [float(df[df['ID'] == id][axis]) for axis in axes_checklist]
         df['Distance'] = df[axes_checklist].apply(
             calculate_distance, targets=targets, axis=1)
