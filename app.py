@@ -1,5 +1,6 @@
 # import json
 import math
+import os
 import numpy as np
 import pandas as pd
 from sklearn.preprocessing import RobustScaler, MinMaxScaler, StandardScaler
@@ -20,6 +21,7 @@ import plotly.express as px
 app = dash.Dash(__name__)#, external_stylesheets=external_stylesheets)
 server = app.server
 app.title = "RacketSpace"
+server.secret_key = os.environ.get('SECRET_KEY', 'my-secret-key')
 
 # df = pd.read_csv('https://gist.githubusercontent.com/chriddyp/5d1ea79569ed194d432e56108a04d188/raw/a9f9e8076b837d541398e999dcbac2b2826a81f8/gdp-life-exp-2007.csv')	
 # raw_df = pd.read_csv('data/racket_specs.csv')
@@ -185,22 +187,22 @@ app.layout = html.Div(style={'margin':'0px','padding':"0px"},children=[
                 html.Div(id='filter-sliders-div', className='twelve columns', children=[
                     html.Div(className='four columns filter-slider-div', children=[
                         html.Label('Head Size (in)'),
-                        dcc.Graph(
-                            id='hist-head-size',
-                            figure={
-                                'data': [
-                                    {
-                                        'x': df['Head Size (in)'],
-                                        'nbins': 70,
-                                        'name': 'Head Size',
-                                        'marker':{'color':colors['blue']},
-                                        'type': 'histogram'
-                                    },
-                                ],
-                                'layout': filter_histogram_layout
-                            },
-                            config={'displayModeBar':False},
-                        ),
+                        # dcc.Graph(
+                        #     id='hist-head-size',
+                        #     figure={
+                        #         'data': [
+                        #             {
+                        #                 'x': df['Head Size (in)'],
+                        #                 'nbins': 70,
+                        #                 'name': 'Head Size',
+                        #                 'marker':{'color':colors['blue']},
+                        #                 'type': 'histogram'
+                        #             },
+                        #         ],
+                        #         'layout': filter_histogram_layout
+                        #     },
+                        #     config={'displayModeBar':False},
+                        # ),
                         dcc.RangeSlider(
                             id='head-size-slider',
                             className='filter-slider',
@@ -217,22 +219,22 @@ app.layout = html.Div(style={'margin':'0px','padding':"0px"},children=[
 
                     html.Div(className='four columns filter-slider-div', children=[
                         html.Label('Strung Weight (oz)'),
-                        dcc.Graph(
-                            id='hist-strung-weight',
-                            figure={
-                                'data': [
-                                    {
-                                        'x': df['Strung Weight (oz)'],
-                                        'nbins': 26,
-                                        'name': 'Strung Weight',
-                                        'marker':{'color':colors['blue']},
-                                        'type': 'histogram'
-                                    },
-                                ],
-                                'layout': filter_histogram_layout
-                            },
-                            config={'displayModeBar':False},
-                        ),
+                        # dcc.Graph(
+                        #     id='hist-strung-weight',
+                        #     figure={
+                        #         'data': [
+                        #             {
+                        #                 'x': df['Strung Weight (oz)'],
+                        #                 'nbins': 26,
+                        #                 'name': 'Strung Weight',
+                        #                 'marker':{'color':colors['blue']},
+                        #                 'type': 'histogram'
+                        #             },
+                        #         ],
+                        #         'layout': filter_histogram_layout
+                        #     },
+                        #     config={'displayModeBar':False},
+                        # ),
                         dcc.RangeSlider(
                             id='strung-weight-slider',
                             className='filter-slider',
@@ -247,22 +249,22 @@ app.layout = html.Div(style={'margin':'0px','padding':"0px"},children=[
 
                     html.Div(className='four columns filter-slider-div', children=[
                         html.Label('Balance (pts HL/HH)'),
-                        dcc.Graph(
-                            id='hist-balance',
-                            figure={
-                                'data': [
-                                    {
-                                        'x': df['Balance (pts)'],
-                                        'nbins': 61,
-                                        'name': 'Balance',
-                                        'marker':{'color':colors['blue']},
-                                        'type': 'histogram'
-                                    },
-                                ],
-                                'layout': filter_histogram_layout
-                            },
-                            config={'displayModeBar':False},
-                        ),
+                        # dcc.Graph(
+                        #     id='hist-balance',
+                        #     figure={
+                        #         'data': [
+                        #             {
+                        #                 'x': df['Balance (pts)'],
+                        #                 'nbins': 61,
+                        #                 'name': 'Balance',
+                        #                 'marker':{'color':colors['blue']},
+                        #                 'type': 'histogram'
+                        #             },
+                        #         ],
+                        #         'layout': filter_histogram_layout
+                        #     },
+                        #     config={'displayModeBar':False},
+                        # ),
                         dcc.RangeSlider(
                             id='balance-slider',
                             className='filter-slider',
@@ -277,22 +279,22 @@ app.layout = html.Div(style={'margin':'0px','padding':"0px"},children=[
 
                     html.Div(className='four columns filter-slider-div', children=[
                         html.Label('Beam Width (avg. mm)'),
-                        dcc.Graph(
-                            id='hist-beam-width',
-                            figure={
-                                'data': [
-                                    {
-                                        'x': df['Beam Width (avg. mm)'],
-                                        'nbins': 32,
-                                        'name': 'Beam Width',
-                                        'marker':{'color':colors['blue']},
-                                        'type': 'histogram'
-                                    },
-                                ],
-                                'layout': filter_histogram_layout
-                            },
-                            config={'displayModeBar':False},
-                        ),
+                        # dcc.Graph(
+                        #     id='hist-beam-width',
+                        #     figure={
+                        #         'data': [
+                        #             {
+                        #                 'x': df['Beam Width (avg. mm)'],
+                        #                 'nbins': 32,
+                        #                 'name': 'Beam Width',
+                        #                 'marker':{'color':colors['blue']},
+                        #                 'type': 'histogram'
+                        #             },
+                        #         ],
+                        #         'layout': filter_histogram_layout
+                        #     },
+                        #     config={'displayModeBar':False},
+                        # ),
                         dcc.RangeSlider(
                             id='beam-width-slider',
                             className='filter-slider',
@@ -307,22 +309,22 @@ app.layout = html.Div(style={'margin':'0px','padding':"0px"},children=[
 
                     html.Div(className='four columns filter-slider-div', children=[
                         html.Label('String Density (X/in.²)'),
-                        dcc.Graph(
-                            id='hist-string-density',
-                            figure={
-                                'data': [
-                                    {
-                                        'x': df['String Density (X/in2)'],
-                                        'nbins': 25,
-                                        'name': 'String Density',
-                                        'marker':{'color':colors['blue']},
-                                        'type': 'histogram'
-                                    },
-                                ],
-                                'layout': filter_histogram_layout
-                            },
-                            config={'displayModeBar':False},
-                        ),
+                        # dcc.Graph(
+                        #     id='hist-string-density',
+                        #     figure={
+                        #         'data': [
+                        #             {
+                        #                 'x': df['String Density (X/in2)'],
+                        #                 'nbins': 25,
+                        #                 'name': 'String Density',
+                        #                 'marker':{'color':colors['blue']},
+                        #                 'type': 'histogram'
+                        #             },
+                        #         ],
+                        #         'layout': filter_histogram_layout
+                        #     },
+                        #     config={'displayModeBar':False},
+                        # ),
                         dcc.RangeSlider(
                             id='string-density-slider',
                             className='filter-slider',
@@ -337,22 +339,22 @@ app.layout = html.Div(style={'margin':'0px','padding':"0px"},children=[
 
                     html.Div(className='four columns filter-slider-div', children=[
                         html.Label('Swingweight'),
-                        dcc.Graph(
-                            id='hist-swingweight',
-                            figure={
-                                'data': [
-                                    {
-                                        'x': df['Swingweight'],
-                                        'nbins': 220,
-                                        'name': 'Swingweight',
-                                        'marker':{'color':colors['blue']},
-                                        'type': 'histogram'
-                                    },
-                                ],
-                                'layout': filter_histogram_layout
-                            },
-                            config={'displayModeBar':False},
-                        ),
+                        # dcc.Graph(
+                        #     id='hist-swingweight',
+                        #     figure={
+                        #         'data': [
+                        #             {
+                        #                 'x': df['Swingweight'],
+                        #                 'nbins': 220,
+                        #                 'name': 'Swingweight',
+                        #                 'marker':{'color':colors['blue']},
+                        #                 'type': 'histogram'
+                        #             },
+                        #         ],
+                        #         'layout': filter_histogram_layout
+                        #     },
+                        #     config={'displayModeBar':False},
+                        # ),
                         dcc.RangeSlider(
                             id='swingweight-slider',
                             className='filter-slider',
@@ -367,22 +369,22 @@ app.layout = html.Div(style={'margin':'0px','padding':"0px"},children=[
 
                     html.Div(className='four columns filter-slider-div', children=[
                         html.Label('Stiffness'),
-                        dcc.Graph(
-                            id='hist-stiffness',
-                            figure={
-                                'data': [
-                                    {
-                                        'x': df['Stiffness'],
-                                        'nbins': 62,
-                                        'name': 'Stiffness',
-                                        'marker':{'color':colors['blue']},
-                                        'type': 'histogram'
-                                    },
-                                ],
-                                'layout': filter_histogram_layout
-                            },
-                            config={'displayModeBar':False},
-                        ),
+                        # dcc.Graph(
+                        #     id='hist-stiffness',
+                        #     figure={
+                        #         'data': [
+                        #             {
+                        #                 'x': df['Stiffness'],
+                        #                 'nbins': 62,
+                        #                 'name': 'Stiffness',
+                        #                 'marker':{'color':colors['blue']},
+                        #                 'type': 'histogram'
+                        #             },
+                        #         ],
+                        #         'layout': filter_histogram_layout
+                        #     },
+                        #     config={'displayModeBar':False},
+                        # ),
                         dcc.RangeSlider(
                             id='stiffness-slider',
                             # className='filter-slider',
