@@ -566,7 +566,7 @@ def select_all_none_mfrs(select_all, select_none):
         return sorted(list(df['Manufacturer'].unique()))
     else:
         return []
-#
+
 # @app.callback(
 #     Output('hidden-div', 'children'),
 #     [Input('axes-checklist', 'value')])
