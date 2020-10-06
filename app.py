@@ -666,7 +666,7 @@ def update_scatter(mfrs, head_size_range, strung_weight_range,
     # Calculate dynamic PCA columns if ***checkbox enabled***
     fig = px.scatter(filtered_df, 
                  x=x_col, y=y_col,
-                 color=color, hover_name='Model',
+                 color=color, hover_name='Name',
                  labels={
                     x_col: x_col,
                     y_col: y_col,
