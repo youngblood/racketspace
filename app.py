@@ -161,7 +161,7 @@ app.layout = html.Div(style={'margin':'0px','padding':"0px"},children=[
              # style={'outline': '1px solid #794bc4','outline-offset':'-10px','padding-top':'13px','padding-bottom':'13px'},
              children=[
         html.Details(children=[
-            html.Summary('Filter by Specifications',style={'color':colors['purple'],'outline':'none'}),
+            html.Summary('1) Filter Rackets by Specifications',style={'color':colors['pink'],'outline':'none'}),
             html.Div(style={'padding':"0px"}, children=[
                 dcc.Checklist(
                     id='current-models-only-checkbox',
@@ -401,6 +401,7 @@ app.layout = html.Div(style={'margin':'0px','padding':"0px"},children=[
         ]),
     ]),
     html.Div(className='three columns inner-border', id='settings', children=[
+        html.Label('2) Select Chart Axes & Settings',style={'color':colors['pink'],'outline':'none', 'margin-bottom':'10px'}),
         dcc.Tabs(id="tabs", value='tab-1', parent_className='custom-tabs', className='custom-tabs-container', children=[
             dcc.Tab(label='Choose Axes', value='tab-1', className='custom-tab',
                     selected_className='custom-tab--selected',
@@ -484,17 +485,18 @@ app.layout = html.Div(style={'margin':'0px','padding':"0px"},children=[
         ),
     ]),
     html.Div(className='twelve columns inner-border',id='table-div', children=[
-        html.Label('Search or click a racket in the chart to see details and similar rackets.',
-                   style={'margin-top':'5px','margin-bottom':'10px'}),
+        html.Label('3) Search for a racket below or click on one in the chart above to see details and similar rackets.',
+                   style={'margin-top':'5px','margin-bottom':'10px','color':colors['pink']}),
         dcc.Dropdown(
             id='name-dropdown',
             options=[{'label': model, 'value': model} for model in sorted(list(df['Name'].unique()))],
             multi=False,
             style={'background-color':colors['gray'], 'color':colors['black'], 'border-radius':'4px', 'border':'none', 'margin-bottom':'10px'},
-            value=None
+            value=None,
+            placeholder="Search for a Racket...",
         ),
     html.Details(children=[
-            html.Summary('Axes to Consider for Similarity',style={'color':colors['purple'],'outline':'none','margin-bottom':'10px'}),
+            html.Summary('4) Specify Axes to Consider for Similarity',style={'color':colors['pink'],'outline':'none','margin-bottom':'10px'}),
             html.Div(style={'margin-bottom':"10px"}, children=[
                 dcc.Checklist(
                     id='axes-checklist',
