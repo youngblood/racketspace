@@ -479,8 +479,8 @@ there.
   /*display:inline-block;*/
     /*blue/pink/red*/
 
-    background: -webkit-linear-gradient(90deg,#00d0ff,#ff00fb,#ff00fb,#ff00fb);
-    background: linear-gradient(90deg,#00d0ff,#ff00fb,#ff00fb,#ff00fb);
+    background: -webkit-linear-gradient(90deg,#00d0ff,#ff00fb);
+    background: linear-gradient(90deg,#00d0ff,#ff00fb);
 
     /*blue/purple/pink/*/
     /*
@@ -501,4 +501,95 @@ there.
 
 .Select--multi .Select-value {
     color: #00d0ff !important;
+}
+
+.tooltip {
+    /*background-color: #ffaffc;
+    border-radius: 10px;
+    padding: 8px 10px;
+    position: relative;
+    margin: 15px;
+    text-align: center;*/
+}
+
+.tooltip::after {
+    background-color: #222222;
+    border-radius: 10px;
+    color: #794bc4;
+    display: none;
+    padding: 8px 10px;
+    position: absolute;
+    text-align: center;
+    z-index: 999;
+}
+
+.tooltip.top::after {
+    content: 'top';
+    top: 0;
+    left: 50%;
+    transform: translate(-50%, calc(-100% - 10px));
+}
+
+.tooltip.bottom::after {
+    content: 'bottom';
+    bottom: 0;
+    left: 50%;
+    transform: translate(-50%, calc(100% + 10px));
+}
+
+.tooltip.right::after {
+    content: 'right';
+    top: 0;
+    right: 0;
+    transform: translateX(calc(100% + 10px));
+}
+
+.tooltip.left::after {
+    content: 'RacquetSpace is a tool for quantitatively exploring thousands of tennis racquets, new and old.';
+    width: 230px;
+    top: 0;
+    left: 0;
+    transform: translateX(calc(-100% - 10px));
+}
+
+.tooltip:hover::after {
+    display: block;
+}
+
+.tooltip::before {
+    background-color: #222222;
+    content: ' ';
+    display: none;
+    position: absolute;
+    width: 15px;
+    height: 15px;
+    z-index: 999;
+}
+
+.tooltip:hover::before {
+    display: block;
+}
+
+.tooltip.top::before {
+    top: 0;
+    left: 50%;
+    transform: translate(-50%, calc(-100% - 5px)) rotate(45deg);
+}
+
+.tooltip.bottom::before {
+    bottom: 0;
+    left: 50%;
+    transform: translate(-50%, calc(100% + 5px)) rotate(45deg);
+}
+
+.tooltip.right::before {
+    top: 50%;
+    right: 0;
+    transform: translate(calc(100% + 5px), -50%) rotate(45deg);
+}
+
+.tooltip.left::before {
+    top: 50%;
+    left: 0;
+    transform: translate(calc(-100% - 5px), -50%) rotate(45deg);
 }

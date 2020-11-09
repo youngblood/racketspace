@@ -149,13 +149,20 @@ filter_histogram_layout = {'xaxis':{'showticklabels':False},
 
 
 app.layout = html.Div(style={'margin':'0px','padding':"0px"},children=[
-    html.Div(style={'padding-left':'10px','min-width':'200px'}, children=[ # className='twelve columns',
+    html.Div(style={'padding-left':'10px','min-width':'200px','float':'left'}, children=[ # className='twelve columns',
         html.H1(className='gradient-text', children=[
             html.Img(src=app.get_asset_url('logo.png'), height=32),
             'RACKETSPACE',
         ])],
     ),
-
+    html.Div("About",className='tooltip left',style={'float':'right',
+                                                     'background-color': colors['purple'],
+                                                     'color': 'black',
+                                                     'border-radius': '10px',
+                                                     'padding': '7px 10px',
+                                                     'position': 'relative',
+                                                     'margin-right': '10px',
+                                                     'text-align': 'center'}),
     html.Div(id='filters-div',
              className='twelve columns inner-border',
              # style={'outline': '1px solid #794bc4','outline-offset':'-10px','padding-top':'13px','padding-bottom':'13px'},
@@ -248,7 +255,7 @@ app.layout = html.Div(style={'margin':'0px','padding':"0px"},children=[
                     ]),
 
                     html.Div(className='four columns filter-slider-div', children=[
-                        html.Label('Balance (pts HL/HH)'),
+                        html.Label('Balance (points: head light ↔ head heavy)'),
                         dcc.Graph(
                             id='hist-balance',
                             figure={
@@ -278,7 +285,7 @@ app.layout = html.Div(style={'margin':'0px','padding':"0px"},children=[
                     ]),
 
                     html.Div(className='four columns filter-slider-div', children=[
-                        html.Label('Beam Width (avg. mm)'),
+                        html.Label('Beam Width (mm)'),
                         dcc.Graph(
                             id='hist-beam-width',
                             figure={
@@ -308,7 +315,7 @@ app.layout = html.Div(style={'margin':'0px','padding':"0px"},children=[
                     ]),
 
                     html.Div(className='four columns filter-slider-div', children=[
-                        html.Label('String Density (X/in.²)'),
+                        html.Label('String Density (intersections / in²)'),
                         dcc.Graph(
                             id='hist-string-density',
                             figure={
@@ -338,7 +345,7 @@ app.layout = html.Div(style={'margin':'0px','padding':"0px"},children=[
                     ]),
 
                     html.Div(className='four columns filter-slider-div', children=[
-                        html.Label('Swingweight'),
+                        html.Label('Swingweight (kg•cm²)'),
                         dcc.Graph(
                             id='hist-swingweight',
                             figure={
@@ -368,7 +375,7 @@ app.layout = html.Div(style={'margin':'0px','padding':"0px"},children=[
                     ]),
 
                     html.Div(className='four columns filter-slider-div', children=[
-                        html.Label('Stiffness'),
+                        html.Label('Stiffness (RA)'),
                         dcc.Graph(
                             id='hist-stiffness',
                             figure={
@@ -413,11 +420,11 @@ app.layout = html.Div(style={'margin':'0px','padding':"0px"},children=[
                     style={'border-radius':'4px', 'background-color': colors['gray'], 'color':colors['black'], 'border': 'none'},
                     options=[{'label': 'Head Size (in)', 'value': 'Head Size (in)'},
                              {'label': 'Strung Weight (oz)', 'value': 'Strung Weight (oz)'},
-                             {'label': 'Beam Width (avg. mm)', 'value': 'Beam Width (avg. mm)'},
+                             {'label': 'Beam Width (mm)', 'value': 'Beam Width (avg. mm)'},
                              {'label': 'Balance (pts)', 'value': 'Balance (pts)'},
-                             {'label': 'String Density (intersections / sq. in.)', 'value': 'String Density (X/in2)'},
-                             {'label': 'Swingweight', 'value': 'Swingweight'},
-                             {'label': 'Stiffness', 'value': 'Stiffness'},
+                             {'label': 'String Density (intersections / in²)', 'value': 'String Density (X/in2)'},
+                             {'label': 'Swingweight (kg•cm²)', 'value': 'Swingweight'},
+                             {'label': 'Stiffness (RA)', 'value': 'Stiffness'},
                              {'label': 'Current/Old Models', 'value': 'Current/Old Models'}],
                     value='Head Size (in)'
                 ),
@@ -428,11 +435,11 @@ app.layout = html.Div(style={'margin':'0px','padding':"0px"},children=[
                     style={'border-radius':'4px', 'background-color': colors['gray'], 'color':colors['black'], 'border': 'none'}, #
                     options=[{'label': 'Head Size (in)', 'value': 'Head Size (in)'},
                              {'label': 'Strung Weight (oz)', 'value': 'Strung Weight (oz)'},
-                             {'label': 'Beam Width (avg. mm)', 'value': 'Beam Width (avg. mm)'},
+                             {'label': 'Beam Width (mm)', 'value': 'Beam Width (avg. mm)'},
                              {'label': 'Balance (pts)', 'value': 'Balance (pts)'},
-                             {'label': 'String Density (intersections / sq. in.)', 'value': 'String Density (X/in2)'},
-                             {'label': 'Swingweight', 'value': 'Swingweight'},
-                             {'label': 'Stiffness', 'value': 'Stiffness'},
+                             {'label': 'String Density (intersections / in²)', 'value': 'String Density (X/in2)'},
+                             {'label': 'Swingweight (kg•cm²)', 'value': 'Swingweight'},
+                             {'label': 'Stiffness (RA)', 'value': 'Stiffness'},
                              {'label': 'Current/Old Models', 'value': 'Current/Old Models'}],
                     value='Strung Weight (oz)'
                 ),
@@ -464,11 +471,11 @@ app.layout = html.Div(style={'margin':'0px','padding':"0px"},children=[
             className='custom-dropdown',
             options=[{'label': 'Head Size (in)', 'value': 'Head Size (in)'},
                      {'label': 'Strung Weight (oz)', 'value': 'Strung Weight (oz)'},
-                     {'label': 'Beam Width (avg. mm)', 'value': 'Beam Width (avg. mm)'},
+                     {'label': 'Beam Width (mm)', 'value': 'Beam Width (avg. mm)'},
                      {'label': 'Balance (pts)', 'value': 'Balance (pts)'},
-                     {'label': 'String Density (intersections / sq. in.)', 'value': 'String Density (X/in2)'},
-                     {'label': 'Swingweight', 'value': 'Swingweight'},
-                     {'label': 'Stiffness', 'value': 'Stiffness'},
+                     {'label': 'String Density (intersections / in²)', 'value': 'String Density (X/in2)'},
+                     {'label': 'Swingweight (kg•cm²)', 'value': 'Swingweight'},
+                     {'label': 'Stiffness (RA)', 'value': 'Stiffness'},
                      {'label': 'Current/Old Models', 'value': 'Current/Old Models'},
                      {'label': 'Principal Component 3', 'value': 'Principal Component 3'}],
             value='Balance (pts)'
@@ -482,6 +489,7 @@ app.layout = html.Div(style={'margin':'0px','padding':"0px"},children=[
 			 children=[
         dcc.Graph(
             id='racquetspace_graph',
+            config={'displayModeBar':False},
         ),
     ]),
     html.Div(className='twelve columns inner-border',id='table-div', children=[
@@ -504,10 +512,10 @@ app.layout = html.Div(style={'margin':'0px','padding':"0px"},children=[
                         {'label': 'Head Size (in)', 'value': 'Head Size (in)'},
                         {'label': 'Strung Weight (oz)', 'value': 'Strung Weight (oz)'},
                         {'label': 'Balance (pts)', 'value': 'Balance (pts)'},
-                        {'label': 'Stiffness', 'value': 'Stiffness'},
-                        {'label': 'Beam Width (avg. mm)', 'value': 'Beam Width (avg. mm)'},
-                        {'label': 'Swingweight', 'value': 'Swingweight'},
-                        {'label': 'String Density (intersections / sq. in.)', 'value': 'String Density (X/in2)'},
+                        {'label': 'Stiffness (RA)', 'value': 'Stiffness'},
+                        {'label': 'Beam Width (mm)', 'value': 'Beam Width (avg. mm)'},
+                        {'label': 'Swingweight (kg•cm²)', 'value': 'Swingweight'},
+                        {'label': 'String Density (intersections / in²)', 'value': 'String Density (X/in2)'},
                     ],
                     value=['Head Size (in)', 'Strung Weight (oz)', 'Balance (pts)', 'Stiffness', 'Beam Width (avg. mm)',
                            'Swingweight', 'String Density (X/in2)'],
@@ -526,15 +534,15 @@ app.layout = html.Div(style={'margin':'0px','padding':"0px"},children=[
 				{'name': 'Head Size (in)', 'id': 'Head Size (in)'},
 				{'name': 'Strung Weight (oz)', 'id': 'Strung Weight (oz)'},
 				{'name': 'Balance (pts)', 'id': 'Balance (pts)'},
-				{'name': 'Stiffness', 'id': 'Stiffness'},
-				{'name': 'Beam Width (avg. mm)', 'id': 'Beam Width (avg. mm)', 'type': 'numeric', 'format': Format(
+				{'name': 'Stiffness (RA)', 'id': 'Stiffness'},
+				{'name': 'Beam Width (mm)', 'id': 'Beam Width (avg. mm)', 'type': 'numeric', 'format': Format(
                     scheme=Scheme.fixed,
                     precision=2,)},
-                {'name': 'Swingweight', 'id': 'Swingweight'},
-				{'name': 'String Density (X/in2)', 'id': 'String Density (X/in2)', 'type': 'numeric', 'format': Format(
+                {'name': 'Swingweight (kg•cm²)', 'id': 'Swingweight'},
+				{'name': 'String Density (✛/in²)', 'id': 'String Density (X/in2)', 'type': 'numeric', 'format': Format(
                     scheme=Scheme.fixed,
                     precision=3,)},
-				{'name': 'link', 'id': 'link', 'presentation':'markdown'},
+				{'name': 'Shop', 'id': 'link', 'presentation':'markdown'},
             ],
 			style_header={
 				'backgroundColor': colors['black'],
